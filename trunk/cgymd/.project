@@ -3,6 +3,7 @@
 	<name>cgymd</name>
 	<comment></comment>
 	<projects>
+		<project>libcgym</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

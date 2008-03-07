@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 3.1.0?>
+
+<ManagedProjectBuildInfo>
+<project id="libcgym.cdt.managedbuild.target.gnu.so.621693719" name="Shared Library (Gnu)" projectType="cdt.managedbuild.target.gnu.so">
+<configuration artifactExtension="so" artifactName="libcgym" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.so.debug.1521919017" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug">
+<toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.852315042" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug.1816633141" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.debug.1399792772" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.so.debug.1474929340" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.debug.329462757" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.so.debug.2006372461" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.debug"/>
+</toolChain>
+</configuration>
+<configuration artifactExtension="so" artifactName="libcgym" cleanCommand="rm -rf" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="cdt.managedbuild.config.gnu.so.release.1893637508" name="Release" parent="cdt.managedbuild.config.gnu.so.release">
+<toolChain id="cdt.managedbuild.toolchain.gnu.so.release.2069226874" name="GCC Tool Chain" superClass="cdt.managedbuild.toolchain.gnu.so.release">
+<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.so.release.728246407" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.so.release"/>
+<tool id="cdt.managedbuild.tool.gnu.c.compiler.so.release.53264721" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.so.release"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.so.release.2043692950" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.so.release"/>
+<tool id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.694835374" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release"/>
+<tool id="cdt.managedbuild.tool.gnu.assembler.so.release.737204179" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.so.release"/>
+</toolChain>
+</configuration>
+</project>
+</ManagedProjectBuildInfo>

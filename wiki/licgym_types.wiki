@@ -1,0 +1,123 @@
+#summary Data types and related functions in libcgym
+#labels Phase-Implementation
+= Tipuri de date si functii asociate cu ele =
+
+{{{
+struct {
+	int sockfd;
+	int state; /* IDLE, CONNECTING, RECV_SIZE, RECV_DATA */
+
+	char *server;
+	int port;
+
+	char *buf;
+} cgym_sock_t;
+
+cgym_sock_t *cgym_sock_create(char *server, int port)
+
+/*
+ * sterge continutul bufferului intern
+ * returneaza 0 la succes, nenul la eroare
+ */
+int cgym_sock_clear(cgym_sock_t *sock)
+
+/*
+ * returneaza valoarea campului sockfd
+ */
+int cgym_sock_sockfd(cgym_sock_t *sock)
+
+/*
+ * returneaza valoarea campului state
+ */
+int cgym_sock_state(cgym_sock_t *sock)
+
+/*
+ * afiseaza la stdout "(sockfd)server:port"
+ */
+void cgym_sock_info(cgym_sock_t *sock)
+
+/*
+ * inchide socket-ul si elibereaza resursele
+ * returneaza 0 la succes, nenul la eroare
+ * la succes, pune sock pe NULL
+ */
+int cgym_sock_free(cgym_sock_t **sock)
+
+
+struct {
+	int type; /* NONE, FILE, DIRECTORY */
+	unsigned long size; /* 0 for directory */
+	char *md5; /* NULL for directory */
+	char *file;
+} cgym_entry_t;
+
+/*
+ * aloca resurse pentru un entry si salveaza numele acestuia
+ *
+ * returneaza entry-ul la succes, NULL la eroare
+ */
+cgym_entry_t *cgym_entry_init(char *file)
+
+/*
+ * returneaza tipul entry-ului { NONE, FILE, DIRECTORY }
+ */
+int cgym_entry_type(cgym_entry_t *e)
+
+/*
+ * returneaza campul size al entry-ului
+ */
+unsigned long cgym_entry_size(cgym_entry_t *e)
+
+/*
+ * returneaza campul MD5 al entry-ului
+ */
+char *cgym_entry_md5(cgym_entry_t *e)
+
+/*
+ * returneaza campul file al entry-ului
+ */
+char *cgym_entry_file(cgym_entry_t *e)
+
+/*
+ * elibereaza resursele entry-ului
+ * returneaza 0 la succes, nenul la eroare
+ * la succes, pune e pe NULL
+ */
+int cgym_entry_free(cgym_entry_t **e)
+
+
+struct {
+	cgym_entry_t *entry;
+	unsigned long start;
+	unsigned long stop;
+} cgym_segment_t;
+
+/*
+ * initializeaza segmentul cu entry-ul e, octetul de inceput start (inclusiv)
+ * si octetul de sfarsit stop (exclusiv)
+ * returneaza segmentul nou la succes, NULL la eroare
+ */
+cgym_segment_t *cgym_segment_init(cgym_entry_t *e, unsigned long start, unsigned long stop)
+
+/*
+ * returneaza valoarea campului entry al segmentului
+ */
+cgym_entry_t *cgym_segment_entry(cgym_segment_t *s)
+
+/*
+ * returneaza valoarea campului start al segmentului
+ */
+unsigned long cgym_segment_start(cgym_segment_t *s)
+
+/*
+ * returneaza valoarea campului stop al segmentului
+ */
+unsigned long cgym_segment_stop(cgym_segment_t *s)
+
+/*
+ * elibereaza resursele segmentului
+ * returneaza 0 la succes, nenul la eroare
+ * la succes, pune s pe NULL
+ */
+int cgym_segment_free(cgym_segment_t **s)
+}}}

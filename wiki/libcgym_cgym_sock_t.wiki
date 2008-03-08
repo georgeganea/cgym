@@ -1,4 +1,6 @@
+#summary Description of the cgym_sock_t data type.
 #labels Phase-Implementation
+
 {{{
 struct {
 	int sockfd;

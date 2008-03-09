@@ -5,7 +5,7 @@
 
 `cgym list [DIRECTORY] server1`
 
-`     get [-n N] file server1 server2 ... serverN`
+      `get [-n N] file server1 server2 ... serverN`
 
 = List mode =
 

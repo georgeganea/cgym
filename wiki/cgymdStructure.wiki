@@ -4,7 +4,7 @@
 {{{
 int main(int argc, char **argv) {
        -citeste si verifica argumente
-       -deschide port(portul primit ca argument pe linia de comanda sau 4096 daca nu este specificat un PORT)
+       -deschide port(portul primit ca argument pe linia de comanda sau  2496 daca nu este specificat un PORT)
        -asculta 
        -porneste cate un thread pentru fiecare conexiune
 

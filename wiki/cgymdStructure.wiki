@@ -1,5 +1,6 @@
 #summary Program structure of the cgymd server program
 #labels Phase-Implementation
+
 {{{
 int main(int argc, char **argv) {
        -citeste si verifica argumente
@@ -19,7 +20,7 @@ int main(int argc, char **argv) {
                   -afiseaza ERR\r\n in caz de eroare(ex:directorul nu exista)
        -comanda SIZE(nume_fisier)
                  -afiseaza OK\r\n
-            cgymd_size(nume_fisiser) //determina si afiseaza numele fisierului
+                  cgymd_size(nume_fisiser) //determina si afiseaza numele fisierului
                  -afiseaza ERR\r\n in caz de eroare(ex:fisierul nu exista sau nu e permis accesul)
       -comanda GET(start stop nume_fisier)
             cgymd_send_contents(start stop nume_fisier)//trimite continutul fisierului incepand cu octetul de start si pana la stop

@@ -3,7 +3,7 @@
 
 {{{
 int main(int argc, char **argv) {
-        -citeste si verifica argumente
+           -citeste si verifica argumente
 	   -deschide port(portul primit pe linia de comanda argv[2] sau 2496 daca nu este specificat)
 			 cgym_sock_create()
 			 cgymd_bind()  // asociaza adresa IP si portul cu socketul
@@ -48,11 +48,11 @@ void cgymd_size(char * filename){
 		cgymd_send_err() // "ERR\r\n"		
 }
 
-void cgymd_get(char *arg){
+void cgymd_get(char* start, char* stop, char* filename){
 	-verifica daca parametrii sunt valizi
 	-on Succes
 		cgymd_send_ok() // "OK\r\n"
-		cgymd_send_file_part() //trimite inclusiv "\r\n" la capat
+		cgymd_send_file_part() //adauga "\r\n" la final
 	-on Error	
 		cgymd_send_err() // "ERR\r\n"		
 }

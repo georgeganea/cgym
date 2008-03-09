@@ -1,2 +1,31 @@
 #summary Program structure of the cgymd server program
 #labels Phase-Implementation
+
+int main(int argc, char **argv) {
+       -citeste si verifica argumente
+       -deschide port(portul primit ca argument pe linia de comanda sau 4096 daca nu este specificat un PORT)
+       -asculta 
+       -porneste cate un thread pentru fiecare conexiune
+
+       -cgymd_handler()//asteapta comenzi 
+           -afiseaza CGYM\r\n
+       -comanda LIST(nume_director) 
+            cgymd_list() 
+                  -afiseaza OK\r\n
+                   cgymd_print_dir(dirname)
+                  -afiseaza pentru fiecare fisier din dirname informatii de forma:
+                       type no_bytes md5 path\r\n
+                   cgymd_compute_md5(file)
+                  -afiseaza ERR\r\n in caz de eroare(ex:directorul nu exista)
+       -comanda SIZE(nume_fisier)
+                 -afiseaza OK\r\n
+            cgymd_size(nume_fisiser) //determina si afiseaza numele fisierului
+                 -afiseaza ERR\r\n in caz de eroare(ex:fisierul nu exista sau nu e permis accesul)
+      -comanda GET(start stop nume_fisier)
+            cgymd_send_contents(start stop nume_fisier)//trimite continutul fisierului incepand cu octetul de start si pana la stop
+                -trimite OK\r\n
+                -trimite continutul fisierului(intre start si stop)
+                -trimite \r\n
+      -comanda QUIT
+           cgymd_close()//terminate connection
+}

@@ -1,6 +1,6 @@
 #summary Program structure of the cgymd server program
 #labels Phase-Implementation
-
+{{{
 int main(int argc, char **argv) {
        -citeste si verifica argumente
        -deschide port(portul primit ca argument pe linia de comanda sau 4096 daca nu este specificat un PORT)
@@ -28,4 +28,4 @@ int main(int argc, char **argv) {
                 -trimite \r\n
       -comanda QUIT
            cgymd_close()//terminate connection
-}
+}}}

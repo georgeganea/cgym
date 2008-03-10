@@ -38,7 +38,8 @@ enum cgym_entry_type {
 };
 typedef struct cgym_entry_t_ cgym_entry_t;
 
-cgym_entry_t *cgym_entry_init(char *file);
+cgym_entry_t *cgym_entry_init(char *file, char *md5,
+							int type, unsigned long size);
 int cgym_entry_type(cgym_entry_t *e);
 unsigned long cgym_entry_size(cgym_entry_t *e);
 char *cgym_entry_md5(cgym_entry_t *e);

@@ -14,14 +14,14 @@
  *	1 la incomplet
  *	2 la eroare 
  */
-int cgym_get_list(cgym_sock_t *sock, char *dir, cgym_entry_t **e)
+int cgym_list_get(cgym_sock_t *sock, char *dir, cgym_entry_t **e)
 
 /*
  * afiseaza lista de entry-uri la stdout
  *
  * returneaza numarul de entry-uri
  */
-int cgym_print_list(dir, cgym_entry_t **e)
+int cgym_list_print(dir, cgym_entry_t **e)
 
 
 // Ramura GET

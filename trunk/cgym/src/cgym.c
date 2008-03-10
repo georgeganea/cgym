@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 		
-		s = cgym_get_server_info(argv[argc-1]);
+		s = cgym_server_info_create(argv[argc-1]);
 		
 		if (argc == 4) // directory argument present
 			path = argv[2];
@@ -29,8 +29,7 @@ int main(int argc, char **argv) {
 			
 		cgym_list(s, path);
 		
-		free(s->addr);
-		free(s);
+		cgym_server_info_free(s);
 	} else if (!strcmp(argv[1], "get")) {
 		cgym_server_t **slist;
 		char *tail, *local;
@@ -60,7 +59,7 @@ int main(int argc, char **argv) {
 		slist = malloc(sizeof(*slist) * (argc - start + 1));
 		
 		for (i = start; i < argc; i++)
-			slist[i - start] = cgym_get_server_info(argv[i]);
+			slist[i - start] = cgym_server_info_create(argv[i]);
 		slist[argc - start] = NULL;
 		
 		local = cgym_get_file_name(path);
@@ -70,8 +69,7 @@ int main(int argc, char **argv) {
 		free(local);
 		
 		for (i = start; i < argc; i++) {
-			free(slist[i - start]->addr);
-			free(slist[i - start]);
+			cgym_server_info_free(slist[i-start]);
 		}
 
 		free(slist);
@@ -81,51 +79,6 @@ int main(int argc, char **argv) {
 	}
 	
 	return 0;
-}
-
-cgym_server_t *cgym_get_server_info(char *server) {
-	char *ptr;
-	cgym_server_t *rc = NULL;
-	
-	if (server != NULL) {
-		rc = malloc(sizeof(*rc));
-		
-		if (rc == NULL)
-			return rc;
-		
-		if ((ptr = strchr(server, ':')) != NULL) { // server:port
-			rc->addr = malloc(ptr - server + 1);
-			
-			if (rc->addr == NULL) {
-				free(rc);
-				return NULL;
-			}
-			
-			memcpy(rc->addr, server, ptr - server);
-			rc->addr[ptr - server] = '\0';
-			
-			server = ptr + 1;
-			rc->port = strtol(server, &ptr, 10);
-			
-			if (*ptr != '\0') { // not a valid port number
-				free(rc->addr);
-				free(rc);
-				return NULL;
-			}
-		} else { // server (default port)
-			rc->addr = malloc(strlen(server) + 1);
-			
-			if (rc->addr == NULL) {
-				free(rc);
-				return NULL;
-			}
-			
-			strcpy(rc->addr, server);
-			rc->port = CGYM_DEFAULT_PORT;
-		}
-	}
-	
-	return rc;
 }
 
 char *cgym_get_file_name(char *file) {

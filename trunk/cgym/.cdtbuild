@@ -9,8 +9,18 @@
 <tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.432324915" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
 <option id="gnu.c.compiler.exe.debug.option.optimization.level.2079819175" superClass="gnu.c.compiler.exe.debug.option.optimization.level" value="gnu.c.optimization.level.more" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.misc.other.1080841388" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=c99" valueType="string"/>
+<option id="gnu.c.compiler.option.include.paths.1750184127" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libcgym/src}&quot;"/>
+</option>
 </tool>
-<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.2064311906" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
+<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.2064311906" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug">
+<option id="gnu.c.link.option.libs.2124392392" superClass="gnu.c.link.option.libs" valueType="libs">
+<listOptionValue builtIn="false" value="libcgym"/>
+</option>
+<option id="gnu.c.link.option.paths.804425864" superClass="gnu.c.link.option.paths" valueType="stringList">
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/libcgym/Debug}&quot;"/>
+</option>
+</tool>
 <tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.545579441" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.1030634533" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug"/>
 <macros/>
@@ -32,5 +42,6 @@
 <tool id="cdt.managedbuild.tool.gnu.assembler.exe.release.899289039" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.release"/>
 </toolChain>
 </configuration>
+<macros/>
 </project>
 </ManagedProjectBuildInfo>

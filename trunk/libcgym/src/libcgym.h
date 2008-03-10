@@ -15,19 +15,27 @@ typedef struct cgym_server_t_ cgym_server_t;
   
 
 enum cgym_sock_state {
-	CGYM_IDLE, CGYM_CONNECTING, CGYM_RECV_SIZE, CGYM_RECV_DATA
+	CGYM_SOCK_NONE,
+	CGYM_SOCK_IDLE,
+	CGYM_SOCK_CONNECTING,
+	CGYM_SOCK_RECV_SIZE,
+	CGYM_SOCK_RECV_DATA
 };
 typedef struct cgym_sock_t_ cgym_sock_t;
 
-cgym_sock_t *cgym_sock_create(char *server, int port);
+cgym_sock_t *cgym_sock_create(cgym_server_t *server);
 int cgym_sock_clear(cgym_sock_t *sock);
-int cgym_sock_sockfd(cgym_sock_t *sock);
-int cgym_sock_state(cgym_sock_t *sock);
-void cgym_sock_info(cgym_sock_t *sock);
+int cgym_sock_get_sockfd(cgym_sock_t *sock);
+int cgym_sock_get_state(cgym_sock_t *sock);
+void cgym_sock_print_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
 
 
-enum cgym_entry_type { CGYM_NONE, CGYM_FILE, CGYM_DIRECTORY };
+enum cgym_entry_type {
+	CGYM_ENTRY_NONE,
+	CGYM_ENTRY_FILE,
+	CGYM_ENTRY_DIRECTORY
+};
 typedef struct cgym_entry_t_ cgym_entry_t;
 
 cgym_entry_t *cgym_entry_init(char *file);

@@ -1,12 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libcgym.h"
-
-struct cgym_server_t_ {
-	char *addr;
-	unsigned int port;
-};
-
+#include "libcgym_priv.h"
 
 cgym_server_t *cgym_server_info_create(char *server) {
 	char *ptr;

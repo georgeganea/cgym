@@ -16,8 +16,10 @@
 int main(int argc, char**argv){
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
 	struct sockaddr_in my_addr;    // my address information
+	struct sockaddr_in their_addr; // connector's address information
 	int port;
 	int yes=1;
+	socklen_t sin_size;
 	if (argc<2 || argc>3){
 		fprintf(stderr,"usage:%s directory [port]",argv[0]);
 		exit(1);
@@ -51,6 +53,15 @@ int main(int argc, char**argv){
     if (listen(sockfd, BACKLOG) == -1) {
         perror("listen");
         exit(1);
+    }
+    while(1) {  // main accept() loop
+    	sin_size = sizeof their_addr;
+    	if ((new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size)) == -1) {
+    		perror("accept");
+    	    continue;
+    	}
+    	printf("server: got connection from %s\n", inet_ntoa(their_addr.sin_addr));
+    	close(new_fd);  // parent doesn't need this
     }
 	return 0;
 }

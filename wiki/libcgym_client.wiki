@@ -21,7 +21,7 @@ int cgym_list_get(cgym_sock_t *sock, char *dir, cgym_entry_t **e)
  *
  * returneaza numarul de entry-uri
  */
-int cgym_list_print(dir, cgym_entry_t **e)
+int cgym_list_print(char *dir, cgym_entry_t **e)
 
 
 // Ramura GET

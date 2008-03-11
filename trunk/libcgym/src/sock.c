@@ -10,6 +10,12 @@
 #include "libcgym.h"
 #include "libcgym_priv.h"
 
+/*
+ * creeaza un nou socket (blocking) care se va
+ * conecta la server/port cand se apeleaza cgym_sock_connect()
+ *
+ * returneaza socket-ul la succes, NULL la eroare
+ */
 cgym_sock_t *cgym_sock_create(cgym_server_t *server) {
 	cgym_sock_t *rc = NULL;
 	
@@ -33,6 +39,10 @@ cgym_sock_t *cgym_sock_create(cgym_server_t *server) {
 	return rc;
 }
 
+/*
+ * sterge continutul bufferului intern
+ * returneaza 0 la succes, nenul la eroare
+ */
 int cgym_sock_clear(cgym_sock_t *sock) {
 	int rc = 0;
 	
@@ -48,6 +58,9 @@ int cgym_sock_clear(cgym_sock_t *sock) {
 	return rc;
 }
 
+/*
+ * returneaza valoarea campului sockfd
+ */
 int cgym_sock_get_sockfd(cgym_sock_t *sock) {
 	int rc = -1;
 	
@@ -58,6 +71,9 @@ int cgym_sock_get_sockfd(cgym_sock_t *sock) {
 	return rc;
 }
 
+/*
+ * returneaza valoarea campului state
+ */
 int cgym_sock_get_state(cgym_sock_t *sock) {
 	enum cgym_sock_state rc = CGYM_SOCK_NONE;
 	
@@ -78,6 +94,9 @@ cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock) {
 	return rc;
 }
 
+/*
+ * afiseaza la stdout informatii despre sock
+ */
 void cgym_sock_print_info(cgym_sock_t *sock) {
 	char *ptr;
 	
@@ -104,6 +123,11 @@ void cgym_sock_print_info(cgym_sock_t *sock) {
 	}
 }
 
+/*
+ * inchide socket-ul si elibereaza resursele
+ * 
+ * returneaza 0 la succes, nenul la eroare
+ */
 void cgym_sock_free(cgym_sock_t *sock) {
 	if (sock != NULL) {
 		if (sock->state == CGYM_SOCK_RECV_SIZE
@@ -117,6 +141,12 @@ void cgym_sock_free(cgym_sock_t *sock) {
 	}
 }
 
+/*
+ * pune socket-ul dat in mod blocking daca block este 1,
+ * sau nonblocking daca este 0.
+ *
+ * returneaza 0 la succes, nenul la eroare
+ */
 int cgym_sock_setblocking(cgym_sock_t *sock, int block) {
 	int flags, rc = 0;
 	
@@ -282,6 +312,14 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 	return rc;
 }
 
+/* 
+ * Folosita de cgym_sock_connect()
+ * 
+ * Returneaza
+ * 	0 la succes
+ * 	1 la incomplet
+ * 	>1 la eroare
+ */
 int cgym_recv_handshake(cgym_sock_t *sock) {
 	int rc = cgym_recv(sock, strlen(CGYM_ACK_MESSAGE));
 	

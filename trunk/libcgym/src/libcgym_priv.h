@@ -30,5 +30,7 @@ struct cgym_segment_t_ {
         unsigned long stop;
 };
 
+/* Functii interne */
+
 int cgym_recv_handshake(cgym_sock_t *sock);
 #endif /*LIBCGYM_PRIV_H_*/

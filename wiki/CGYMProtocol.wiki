@@ -70,9 +70,9 @@ Server replies with:
 
 `d - - private/\r\n`
 
-`- 729608192 d2334dbba7313e9abc8c7c072d2af09c ubuntu-7.10-desktop-i386.iso\r\n`
+`- 729608192 d2334dbba7313e9abc8c7c072d2af09c /downloads/ubuntu-7.10-desktop-i386.iso\r\n`
 
-`- 730691584 61c87943a92bc7bf519da4e2555d6e86 ubuntu-7.10-desktop-amd64.iso\r\n`
+`- 730691584 61c87943a92bc7bf519da4e2555d6e86 /downloads/ubuntu-7.10-desktop-amd64.iso\r\n`
 
 `\r\n`
 

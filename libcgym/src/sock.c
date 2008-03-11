@@ -204,7 +204,7 @@ int cgym_sock_connect(cgym_sock_t *sock) {
 			}
 		}
 		
-		if (sock->state == CGYM_SOCK_RECV_HANDSHAKE) {
+		if (!rc && sock->state == CGYM_SOCK_RECV_HANDSHAKE) {
 			rc = cgym_recv_handshake(sock);
 			
 			if (rc == 0) { // am reusit!
@@ -234,7 +234,7 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 	char *tmp;
 	
 	if (sock != NULL) {
-		if (len < sock->capacity) {
+		if (len > sock->capacity) {
 			tmp = realloc(sock->buf, len);
 			if (tmp != NULL) {
 				sock->buf = tmp;
@@ -253,7 +253,16 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 				rc = recv(sock->sockfd,
 						sock->buf + sock->pos, len - sock->pos, 0);
 				
-				if (rc > 0 && rc < len - sock->pos) {
+				/*
+				printf("received %d: %c%c...\n",
+							rc,
+							sock->buf[sock->pos],
+							sock->buf[sock->pos+1]);
+				*/
+				
+				if (rc == len - sock->pos) {
+					rc = 0; // gata
+				} else if (rc > 0) {
 					// mai avem de primit
 					sock->pos += rc;
 					rc = 1;

@@ -25,7 +25,7 @@ cgym_sock_t *cgym_sock_create(cgym_server_t *server) {
 			rc->server = server;
 			
 			rc->buf = NULL;
-			rc->pos = 0;
+			rc->pos_recv = 0;
 			rc->capacity = 0;
 			
 		    if ((rc->sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
@@ -47,9 +47,10 @@ int cgym_sock_clear(cgym_sock_t *sock) {
 	int rc = 0;
 	
 	if (sock != NULL) {
+		sock->capacity = 0;
+		sock->pos_recv = 0;
 		if (sock->buf != NULL) {
 			free(sock->buf);
-			sock->capacity = 0;
 		}
 	} else {
 		rc = 1;
@@ -117,7 +118,7 @@ void cgym_sock_print_info(cgym_sock_t *sock) {
 		printf("%s (%d)", ptr, sock->state);
 		
 		printf("buf[cap=%ld,pos=%ld,s=%p]",
-				sock->capacity, sock->pos, (void *)sock->buf);
+				sock->capacity, sock->pos_recv, (void *)sock->buf);
 	} else {
 		printf("(null)");
 	}
@@ -273,7 +274,7 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 				free(sock->buf);
 				sock->buf = NULL;
 				
-				sock->pos = 0;
+				sock->pos_recv = 0;
 				sock->capacity = 0;
 				
 				rc = 4;
@@ -281,7 +282,7 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 			
 			if (!rc) {
 				rc = recv(sock->sockfd,
-						sock->buf + sock->pos, len - sock->pos, 0);
+						sock->buf + sock->pos_recv, len - sock->pos_recv, 0);
 				
 				/*
 				printf("received %d: %c%c...\n",
@@ -290,18 +291,22 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 							sock->buf[sock->pos+1]);
 				*/
 				
-				if (rc == len - sock->pos) {
+				if (rc == len - sock->pos_recv) {
 					rc = 0; // gata
 				} else if (rc > 0) {
 					// mai avem de primit
-					sock->pos += rc;
+					sock->pos_recv += rc;
 					rc = 1;
 				} else if (rc == 0) {
 					// s-a inchis conexiunea
 					rc = 2;
 				} else if (rc < 0) {
-					// eroare
-					rc = 3;
+					if (errno == EAGAIN) {
+						rc = 1;
+					} else {
+						// eroare
+						rc = 3;
+					}
 				}
 			}
 		}
@@ -312,10 +317,56 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 	return rc;
 }
 
+/*
+ * trimite mesajul buf de len octeti pe sock
+ * returneaza:
+ * 
+ * 	0 la succes
+ * 	1 la incomplet
+ * 	2 la eroare la send()
+ * 	3 la eroare - un apel, cand fosta trimitere nu s-a terminat
+ * 	4 la eroare - sock este NULL
+ */
+int cgym_send(cgym_sock_t *sock, char *buf, unsigned long len) {
+	int rc = 0;
+	
+	if (sock != NULL) {
+		if (sock->pos_send < len) {
+				rc = send(sock->sockfd,
+						buf + sock->pos_send, len - sock->pos_send, 0);
+				
+				if (rc == len - sock->pos_send) {
+					// am trimis tot
+					sock->pos_send = 0;
+					rc = 0;
+				} else if (rc > 0) {
+					// am trimis o parte
+					sock->pos_send += rc;
+					rc = 1;
+				} else if (rc < 0) {
+					if (errno == EAGAIN) {
+						// would block, try again
+						rc = 1;
+					} else {
+						// some real error
+						rc = 2;
+					}
+				}
+		} else { // functia nu este folosita cum trebuie
+			rc = 3;
+		}
+	} else 	{
+		return 4;
+	}
+	
+	return rc;
+}
+
 /* 
  * Folosita de cgym_sock_connect()
  * 
  * Returneaza
+
  * 	0 la succes
  * 	1 la incomplet
  * 	>1 la eroare

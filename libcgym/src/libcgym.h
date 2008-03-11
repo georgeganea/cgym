@@ -37,8 +37,6 @@ cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
 void cgym_sock_print_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
 
-int cgym_recv(cgym_sock_t *sock, unsigned long len);
-
 
 enum cgym_entry_type {
 	CGYM_ENTRY_NONE,

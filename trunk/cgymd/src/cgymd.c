@@ -65,7 +65,7 @@ int main(int argc, char**argv){
     	}
     	printf("server: got connection from %s\n", inet_ntoa(their_addr.sin_addr));
     	pthread_t client_thread;
-    	if (pthread_create(&client_thread, NULL, client_handler, NULL)!=0){
+    	if (pthread_create(&client_thread, NULL, client_handler, (void *)&new_fd)!=0){
     	    	fprintf(stderr,"pthread create error\n");
     	}
     	pthread_join(client_thread, NULL);
@@ -77,6 +77,10 @@ int main(int argc, char**argv){
 
 void* client_handler(void *p){
 	printf("Handling client request\n");
+	int fd = *(int*)p;
+	if (send(fd, CGYM_ACK_MESSAGE, strlen(CGYM_ACK_MESSAGE), 0) == -1)
+	      perror("send");
+	close(fd);
 	pthread_exit(NULL);
 }
 

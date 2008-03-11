@@ -88,11 +88,17 @@ void cgym_sock_print_info(cgym_sock_t *sock) {
 			case CGYM_SOCK_NONE: ptr = "NONE"; break;
 			case CGYM_SOCK_IDLE: ptr = "IDLE"; break;
 			case CGYM_SOCK_CONNECTING: ptr = "CONNECTING"; break;
+			case CGYM_SOCK_RECV_HANDSHAKE: ptr = "RECV_HANDSHAKE"; break;
+			case CGYM_SOCK_RECV_LIST: ptr = "RECV_LIST"; break;
 			case CGYM_SOCK_RECV_SIZE: ptr = "RECV_SIZE"; break;
 			case CGYM_SOCK_RECV_DATA: ptr = "RECV_DATA"; break;
+			case CGYM_SOCK_ERR: ptr = "ERR"; break;
 			default: ptr = "Unknown state"; break;
 		}
 		printf("%s (%d)", ptr, sock->state);
+		
+		printf("buf[cap=%ld,pos=%ld,s=%p]",
+				sock->capacity, sock->pos, (void *)sock->buf);
 	} else {
 		printf("(null)");
 	}
@@ -138,46 +144,75 @@ int cgym_sock_setblocking(cgym_sock_t *sock, int block) {
 	return rc;
 }
 
+/*
+ * conecteaza socket-ul la adresa/portul dat
+ * 
+ * returneaza:
+ * 	0 la succes
+ *	1 la incomplet
+ *	2 la eroare la connect
+ *	3 la eroare la gethostbyname
+ *	4 la eroare la getsockopt
+ *	5 la eroare - nu s-a putut conecta
+ *	6 la eroare la cgym_recv_handshake
+ *	7 la eroare - sock-ul e NULL
+ */
 int cgym_sock_connect(cgym_sock_t *sock) {
 	int rc = 0, optval;
 	struct hostent *he;
     struct sockaddr_in their_addr; // connector's address information
     socklen_t lon = sizeof(optval);
 	
-	if ((he=gethostbyname(sock->server->addr)) != NULL) {  // get the host info
-		their_addr.sin_family = AF_INET;    // host byte order 
-		their_addr.sin_port = htons(sock->server->port);  // short, network byte order 
-		their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-		memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
-	
-		if (sock != NULL) {
-			if (sock->state == CGYM_SOCK_IDLE) {
+	if (sock != NULL) {
+		if (sock->state == CGYM_SOCK_IDLE) {
+			if ((he=gethostbyname(sock->server->addr)) != NULL) {  // get the host info
+				their_addr.sin_family = AF_INET;    // host byte order 
+				their_addr.sin_port = htons(sock->server->port);  // short, network byte order 
+				their_addr.sin_addr = *((struct in_addr *)he->h_addr);
+				memset(their_addr.sin_zero, '\0', sizeof their_addr.sin_zero);
+			
 				rc = connect(sock->sockfd, (struct sockaddr *)&their_addr,
 															sizeof their_addr);
 			
 				if (rc == -1) {
 					if (errno == EINPROGRESS) {
 						// connect() in progress
+						sock->state = CGYM_SOCK_CONNECTING;
 						rc = 1;
 					} else {
 						// eroare
 						perror("connect");
+						sock->state = CGYM_SOCK_ERR;
 						rc = 2;
 					}
+				} else { // connected!
+					sock->state = CGYM_SOCK_RECV_HANDSHAKE;
 				}
-			} else if (sock->state == CGYM_SOCK_CONNECTING) {
-				if (getsockopt(sock->sockfd, SOL_SOCKET,
-								SO_ERROR, (void*)(&optval), &lon) < 0) { 
-					perror("getsockopt");
-					rc = 3;
-				} else if (optval != 0) {
-					rc = 4;
-				}
-			} else { // unknown state
+			} else {
+				sock->state = CGYM_SOCK_ERR;
+				rc = 3;
+			}
+		} else if (sock->state == CGYM_SOCK_CONNECTING) {
+			if (getsockopt(sock->sockfd, SOL_SOCKET,
+							SO_ERROR, (void*)(&optval), &lon) < 0) { 
+				perror("getsockopt");
+				sock->state = CGYM_SOCK_ERR;
+				rc = 4;
+			} else if (optval != 0) {
+				sock->state = CGYM_SOCK_ERR;
 				rc = 5;
 			}
-		} else {
-			rc = 6;
+		}
+		
+		if (sock->state == CGYM_SOCK_RECV_HANDSHAKE) {
+			rc = cgym_recv_handshake(sock);
+			
+			if (rc == 0) { // am reusit!
+				sock->state = CGYM_SOCK_CONNECTED;
+			} else if (rc > 1) { // eroare
+				sock->state = CGYM_SOCK_ERR;
+				rc = 6;
+			}
 		}
 	} else {
 		rc = 7;
@@ -186,8 +221,71 @@ int cgym_sock_connect(cgym_sock_t *sock) {
 	return rc;
 }
 
-long cgym_recv(cgym_sock_t *sock, long len) {
-	if (sock->pos + len < sock->capacity) {
-		
+/* returneaza:
+ * 	0 la succes
+ * 	1 la incomplet
+ * 	2 la remote closed connection
+ * 	3 la eroare la recv()
+ * 	4 la eroare NULL la realloc
+ * 	5 la sock == NULL
+ */
+int cgym_recv(cgym_sock_t *sock, unsigned long len) {
+	int rc = 0;
+	char *tmp;
+	
+	if (sock != NULL) {
+		if (len < sock->capacity) {
+			tmp = realloc(sock->buf, len);
+			if (tmp != NULL) {
+				sock->buf = tmp;
+				sock->capacity = len;				
+			} else {
+				free(sock->buf);
+				sock->buf = NULL;
+				
+				sock->pos = 0;
+				sock->capacity = 0;
+				
+				rc = 4;
+			}
+			
+			if (!rc) {
+				rc = recv(sock->sockfd,
+						sock->buf + sock->pos, len - sock->pos, 0);
+				
+				if (rc > 0 && rc < len - sock->pos) {
+					// mai avem de primit
+					sock->pos += rc;
+					rc = 1;
+				} else if (rc == 0) {
+					// s-a inchis conexiunea
+					rc = 2;
+				} else if (rc < 0) {
+					// eroare
+					rc = 3;
+				}
+			}
+		}
+	} else {
+		rc = 5;
 	}
+	
+	return rc;
+}
+
+int cgym_recv_handshake(cgym_sock_t *sock) {
+	int rc = cgym_recv(sock, strlen(CGYM_ACK_MESSAGE));
+	
+	if (rc == 0) {
+		// am primit tot
+		if (strncmp(sock->buf, CGYM_ACK_MESSAGE, strlen(CGYM_ACK_MESSAGE))) {
+			// nu e bun
+			rc = 2;
+		}
+	} else if (rc > 1) {
+		// eroare
+		rc = 3;
+	}
+	
+	return rc;
 }

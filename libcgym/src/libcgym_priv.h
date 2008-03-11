@@ -7,7 +7,8 @@ struct cgym_server_t_ {
 
 struct cgym_sock_t_ {
         int sockfd;
-        enum cgym_sock_state state; /* NONE, IDLE, CONNECTING, RECV_SIZE, RECV_DATA */
+        enum cgym_sock_state state;
+        /* NONE, IDLE, CONNECTING, RECV_SIZE, RECV_DATA, ... */
 
 		cgym_server_t *server;
 
@@ -28,4 +29,6 @@ struct cgym_segment_t_ {
         unsigned long start;
         unsigned long stop;
 };
+
+int cgym_recv_handshake(cgym_sock_t *sock);
 #endif /*LIBCGYM_PRIV_H_*/

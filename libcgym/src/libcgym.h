@@ -19,8 +19,13 @@ enum cgym_sock_state {
 	CGYM_SOCK_NONE,
 	CGYM_SOCK_IDLE,
 	CGYM_SOCK_CONNECTING,
+	CGYM_SOCK_RECV_HANDSHAKE,
+	CGYM_SOCK_CONNECTED,
+	CGYM_SOCK_RECV_LIST,
 	CGYM_SOCK_RECV_SIZE,
-	CGYM_SOCK_RECV_DATA
+	CGYM_SOCK_RECV_DATA,
+	
+	CGYM_SOCK_ERR
 };
 typedef struct cgym_sock_t_ cgym_sock_t;
 
@@ -31,6 +36,8 @@ int cgym_sock_get_state(cgym_sock_t *sock);
 cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
 void cgym_sock_print_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
+
+int cgym_recv(cgym_sock_t *sock, unsigned long len);
 
 
 enum cgym_entry_type {
@@ -61,8 +68,6 @@ unsigned long cgym_segment_stop(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
 
 /* CGYM client */
-int cgym_recv_handshake(cgym_sock_t *sock);
-
 /* CGYM client -- LIST */
 int cgym_send_list_req(cgym_sock_t *sock, char *dir);
 int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t **e);

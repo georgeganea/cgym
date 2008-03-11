@@ -13,7 +13,7 @@ struct cgym_sock_t_ {
 		cgym_server_t *server;
 
         char *buf;
-        long pos, capacity;
+        unsigned long capacity, pos_recv, pos_send;
 };
 
 struct cgym_entry_t_ {
@@ -31,6 +31,8 @@ struct cgym_segment_t_ {
 };
 
 /* Functii interne */
+int cgym_recv(cgym_sock_t *sock, unsigned long len);
+int cgym_send(cgym_sock_t *sock, char *buf, unsigned long len);
 
 int cgym_recv_handshake(cgym_sock_t *sock);
 #endif /*LIBCGYM_PRIV_H_*/

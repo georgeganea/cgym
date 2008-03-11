@@ -17,7 +17,9 @@ cgym_sock_t *cgym_sock_create(cgym_server_t *server) {
 		if ((rc = malloc(sizeof(*rc))) != NULL) {
 			rc->state = CGYM_SOCK_IDLE;
 			rc->server = server;
+			
 			rc->buf = NULL;
+			rc->pos = 0;
 			rc->capacity = 0;
 			
 		    if ((rc->sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1) {
@@ -61,6 +63,16 @@ int cgym_sock_get_state(cgym_sock_t *sock) {
 	
 	if (sock != NULL) {
 		rc = sock->state;
+	}
+	
+	return rc;
+}
+
+cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock) {
+	cgym_server_t *rc = NULL;
+	
+	if (sock != NULL) {
+		rc = sock->server;
 	}
 	
 	return rc;
@@ -172,4 +184,10 @@ int cgym_sock_connect(cgym_sock_t *sock) {
 	}
 	
 	return rc;
+}
+
+long cgym_recv(cgym_sock_t *sock, long len) {
+	if (sock->pos + len < sock->capacity) {
+		
+	}
 }

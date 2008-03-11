@@ -28,6 +28,7 @@ cgym_sock_t *cgym_sock_create(cgym_server_t *server);
 int cgym_sock_clear(cgym_sock_t *sock);
 int cgym_sock_get_sockfd(cgym_sock_t *sock);
 int cgym_sock_get_state(cgym_sock_t *sock);
+cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
 void cgym_sock_print_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
 
@@ -50,15 +51,22 @@ void cgym_entry_free(cgym_entry_t *e);
 
 typedef struct cgym_segment_t_ cgym_segment_t;
 
-cgym_segment_t *cgym_segment_init(cgym_entry_t *e, unsigned long start, unsigned long stop);
+cgym_segment_t *cgym_segment_init(cgym_sock_t *s, cgym_entry_t *e,
+								unsigned long start, unsigned long stop);
+cgym_sock_t *cgym_segment_sock(cgym_segment_t *s);
+int cgym_segment_set_sock(cgym_segment_t *s, cgym_sock_t *sock);
 cgym_entry_t *cgym_segment_entry(cgym_segment_t *s);
 unsigned long cgym_segment_start(cgym_segment_t *s);
 unsigned long cgym_segment_stop(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
 
+/* CGYM client */
+int cgym_recv_handshake(cgym_sock_t *sock);
+
 /* CGYM client -- LIST */
-int cgym_list_get(cgym_sock_t *sock, char *dir, cgym_entry_t **e);
-int cgym_list_print(char *dir, cgym_entry_t **e);
+int cgym_send_list_req(cgym_sock_t *sock, char *dir);
+int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t **e);
+int cgym_print_list(char *dir, cgym_entry_t **e);
 
 /* CGYM client -- GET */
 int cgym_sock_setblocking(cgym_sock_t *sock, int block);

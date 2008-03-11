@@ -2,16 +2,37 @@
 #include "libcgym.h"
 #include "libcgym_priv.h"
 
-cgym_segment_t *cgym_segment_init(cgym_entry_t *e,
-				unsigned long start, unsigned long stop) {
+cgym_segment_t *cgym_segment_init(cgym_sock_t *s, cgym_entry_t *e,
+								unsigned long start, unsigned long stop) {
 	cgym_segment_t *rc = NULL;
 	
-	if (e != NULL) {
-		if ((rc = malloc(sizeof(*rc))) != NULL) {
-			rc->entry = e;
-			rc->start = start;
-			rc->stop = stop;
-		}
+	if ((rc = malloc(sizeof(*rc))) != NULL) {
+		rc->sock = s;
+		rc->entry = e;
+		rc->start = start;
+		rc->stop = stop;
+	}
+	
+	return rc;
+}
+
+cgym_sock_t *cgym_segment_sock(cgym_segment_t *s) {
+	cgym_sock_t *rc = NULL;
+	
+	if (s != NULL) {
+		rc = s->sock;
+	}
+	
+	return rc;
+}
+
+int cgym_segment_set_sock(cgym_segment_t *s, cgym_sock_t *sock) {
+	int rc = 0;
+	
+	if (s != NULL) {
+		s->sock = sock;
+	} else {
+		rc = -1;
 	}
 	
 	return rc;

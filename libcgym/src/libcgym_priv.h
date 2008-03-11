@@ -12,7 +12,7 @@ struct cgym_sock_t_ {
 		cgym_server_t *server;
 
         char *buf;
-        int capacity;
+        long pos, capacity;
 };
 
 struct cgym_entry_t_ {
@@ -23,6 +23,7 @@ struct cgym_entry_t_ {
 };
 
 struct cgym_segment_t_ {
+		cgym_sock_t *sock;
         cgym_entry_t *entry;
         unsigned long start;
         unsigned long stop;

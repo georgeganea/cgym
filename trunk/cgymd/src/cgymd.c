@@ -9,9 +9,12 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <pthread.h>
 #include "libcgym.h"
 
 #define BACKLOG 10     // how many pending connections queue will hold
+
+void *client_handler(void *p);
 
 int main(int argc, char**argv){
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -61,7 +64,20 @@ int main(int argc, char**argv){
     	    continue;
     	}
     	printf("server: got connection from %s\n", inet_ntoa(their_addr.sin_addr));
+    	pthread_t client_thread;
+    	if (pthread_create(&client_thread, NULL, client_handler, NULL)!=0){
+    	    	fprintf(stderr,"pthread create error\n");
+    	}
+    	pthread_join(client_thread, NULL);
+    	close(new_fd);  // parent doesn't need this
     	close(new_fd);  // parent doesn't need this
     }
 	return 0;
 }
+
+void* client_handler(void *p){
+	printf("Handling client request\n");
+	pthread_exit(NULL);
+}
+
+

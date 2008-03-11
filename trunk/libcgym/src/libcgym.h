@@ -47,7 +47,7 @@ char *cgym_entry_file(cgym_entry_t *e);
 void cgym_entry_free(cgym_entry_t *e);
 
 
-typedef struct cgym_segment_t cgym_segment_t;
+typedef struct cgym_segment_t_ cgym_segment_t;
 
 cgym_segment_t *cgym_segment_init(cgym_entry_t *e, unsigned long start, unsigned long stop);
 cgym_entry_t *cgym_segment_entry(cgym_segment_t *s);

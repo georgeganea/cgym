@@ -1,13 +1,26 @@
 #include "libcgym.h"
 
 /*
+ * 
  * trimite cererea pentru lista catre server
  * returneaza:
  * 	0 la succes
  * 	1 la eroare
+ * trimite prin socketul sock sirul de octeti "LIST dir\r\n"
  */
-int cgym_send_list_req(cgym_sock_t *sock, char *dir);
 
+int cgym_send_list_req(cgym_sock_t *sock, char *dir){
+	
+	int socket = cgym_sock_get_sockfd(sock);
+	char * message = malloc(sizeof(dir)+7);//LIST +sizeof(dir)+\r\n
+	strcpy(message,"LIST ");
+	strcat(message,dir);
+	printf("mesajul inatinte de o si n :%s\n",message);
+	message[strlen(message)+1]='\r';// \0 = \r
+	message[strlen(message)+2]='\n';// se adauga si \n
+	send(socket,message,sizeof(message),0);
+	return 0;
+}
 /*
  * citeste de pe socket lista trimisa de server
  * si o salveaza in e

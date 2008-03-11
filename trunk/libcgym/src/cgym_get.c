@@ -1,6 +1,10 @@
 #include "libcgym.h"
 #include "libcgym_priv.h"
 
+int cgym_recv_handshake(cgym_sock_t *sock) {
+	
+}
+
 int cgym_send_size_req(cgym_sock_t *sock, char *file);
 int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e);
 

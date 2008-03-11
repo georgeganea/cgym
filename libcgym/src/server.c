@@ -62,3 +62,5 @@ void cgym_server_info_print(cgym_server_t *server) {
 		printf("(null)");
 	}
 }
+
+int cgym_segment_assemble(FILE *fd, cgym_segment_t **s);

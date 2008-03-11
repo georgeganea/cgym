@@ -11,7 +11,7 @@ cgym_entry_t *cgym_entry_init(char *file, char *md5,
 		if (file != NULL) {
 			rc->file = malloc(strlen(file)+1);
 		
-			if (rc->file != NULL) { 
+			if (rc->file != NULL) {
 				strcpy(rc->file, file);
 			} else {
 				free(rc);

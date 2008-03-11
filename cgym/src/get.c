@@ -23,13 +23,14 @@ int cgym_get(char *remote, char *local, int segments, cgym_server_t **servers) {
  	}
  	
  	if ((cgym_sock_connect(sock))) {
+ 		cgym_sock_print_info(sock);
  		printf("Error: Could not connect to ");
  		cgym_server_info_print( cgym_sock_get_server(sock) );
  		printf("\n");
  		return 2;
  	}
  	
- 	printf("GATA\n");
+ 	printf("GATA!\n");
 	
 	return 0;
 }

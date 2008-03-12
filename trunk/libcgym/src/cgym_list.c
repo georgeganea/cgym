@@ -24,7 +24,9 @@ int cgym_send_list_req(cgym_sock_t *sock, char *dir){
 	message[strlen(message)+2]='\n';// se adauga si \n
 	i=send(socket,message,strlen(message),0);
 	printf("numarul de octeti trimisi:%d\n",i);
+	if (i)
 	return 0;
+	return 1;
 }
 /*
  * citeste de pe socket lista trimisa de server

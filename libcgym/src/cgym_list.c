@@ -1,4 +1,7 @@
 #include "libcgym.h"
+#include <stdlib.h>
+#include <string.h>
+#include <sys/socket.h>
 
 /*
  * 
@@ -12,13 +15,15 @@
 int cgym_send_list_req(cgym_sock_t *sock, char *dir){
 	
 	int socket = cgym_sock_get_sockfd(sock);
-	char * message = malloc(sizeof(dir)+7);//LIST +sizeof(dir)+\r\n
+	int i;
+	char * message = malloc(strlen(dir)+7);//LIST +strlen(dir)+\r\n
 	strcpy(message,"LIST ");
 	strcat(message,dir);
 	printf("mesajul inatinte de o si n :%s\n",message);
 	message[strlen(message)+1]='\r';// \0 = \r
 	message[strlen(message)+2]='\n';// se adauga si \n
-	send(socket,message,sizeof(message),0);
+	i=send(socket,message,strlen(message),0);
+	printf("numarul de octeti trimisi:%d\n",i);
 	return 0;
 }
 /*

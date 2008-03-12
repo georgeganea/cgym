@@ -80,6 +80,7 @@ void* client_handler(void *p){
 	int fd = *(int*)p;
 	if (send(fd, CGYM_ACK_MESSAGE, strlen(CGYM_ACK_MESSAGE), 0) == -1)
 	      perror("send");
+	compute_md5("/home/ioana/Desktop/todo.txt");
 	close(fd);
 	pthread_exit(NULL);
 }

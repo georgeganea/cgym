@@ -66,6 +66,8 @@ unsigned long cgym_segment_stop(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
 
 /* CGYM client */
+int cgym_send_quit(cgym_sock_t *sock);
+
 /* CGYM client -- LIST */
 int cgym_send_list_req(cgym_sock_t *sock, char *dir);
 int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t **e);

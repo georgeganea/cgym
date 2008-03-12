@@ -60,6 +60,7 @@
 <option id="gnu.c.link.option.noshared.510164267" name="No shared libraries (-static)" superClass="gnu.c.link.option.noshared"/>
 <option id="gnu.c.link.option.libs.923450189" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="libcgym"/>
+<listOptionValue builtIn="false" value="crypto"/>
 <listOptionValue builtIn="false" value="pthread"/>
 </option>
 <option id="gnu.c.link.option.paths.323477113" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
@@ -91,6 +92,7 @@
 
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+
 <storageModule moduleId="scannerConfiguration">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
@@ -388,6 +390,7 @@
 
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+
 <storageModule moduleId="scannerConfiguration">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">

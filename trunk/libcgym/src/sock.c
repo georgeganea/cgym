@@ -387,3 +387,13 @@ int cgym_recv_handshake(cgym_sock_t *sock) {
 	
 	return rc;
 }
+
+/*
+ * Trimite mesajul de deconectare la server pe sock
+ * 
+ * Returneaza
+ * 	0 la succes
+ * 	1 la incomplet
+ * 	2 la eroare
+ */
+int cgym_send_quit(cgym_sock_t *sock);

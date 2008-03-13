@@ -15,12 +15,13 @@
  * information for. On error, the function returns null;
  */
 
+FILE_INFO* add_entry(cgym_entry_t* entry, FILE_INFO* head);
+
 FILE_INFO* list(char* dirname){
 	DIR *dp = NULL;
 	struct dirent *d;
 	struct stat buf;
 	FILE_INFO *files_head = NULL;
-	FILE_INFO *files_curr;
 	
 	printf("Directorul:%s\n",dirname);
 	if ((dp = opendir(dirname))==NULL){
@@ -33,13 +34,7 @@ FILE_INFO* list(char* dirname){
 	 }
 	 cgym_entry_t* first_entry;
 	 first_entry = cgym_entry_init(dirname,NULL,CGYM_ENTRY_NONE,0);
-	 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
-	 		fprintf(stderr,"Eroare la malloc\n");
-	 		return NULL;
-	 }
-	 files_curr->entry_file = first_entry;
-	 files_curr->next = files_head;
-	 files_head = files_curr;
+	 files_head = add_entry(first_entry, files_head);
 	 
 	 while((d = readdir(dp))!=NULL){
 		 if (d->d_ino == 0)
@@ -52,26 +47,26 @@ FILE_INFO* list(char* dirname){
 		 }
 		 if (S_ISDIR(buf.st_mode)){
 			 cgym_entry_t* entry;
-			 entry =	cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,buf.st_size);
-			 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
-				 fprintf(stderr,"Eroare la malloc\n");
-				 return NULL;
-			 }
-			 files_curr->entry_file = entry;
-			 files_curr->next = files_head;
-			 files_head = files_curr;
+			 entry = cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,buf.st_size);
+			 files_head = add_entry(entry,files_head);
 		 }
 		 else if (S_ISREG(buf.st_mode)){
 			 cgym_entry_t* entry;
 			 entry = cgym_entry_init(d->d_name,compute_md5(d->d_name),CGYM_ENTRY_FILE,buf.st_size);
-			 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
-				 fprintf(stderr,"Eroare la malloc\n");
-				 return NULL;
-			 }
-			 files_curr->entry_file = entry;
-			 files_curr->next = files_head;
-			 files_head = files_curr;
+			 files_head = add_entry(entry, files_head);
 		 }
 	 }
 	 return files_head;
+}
+
+FILE_INFO* add_entry(cgym_entry_t* entry, FILE_INFO* head){
+	FILE_INFO *files_curr;
+	 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
+	 		fprintf(stderr,"Eroare la malloc\n");
+	 		return NULL;
+	 }
+	 files_curr->entry_file = entry;
+	 files_curr->next = head;
+	 head = files_curr;
+	 return head;
 }

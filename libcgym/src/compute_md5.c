@@ -14,7 +14,7 @@ char* compute_md5(char* filename){
 		perror("fopen");
 	else {
 		MD5_Init (&context);
-		while (len = fread (buffer, 1, 1024, file))
+		while ((len = fread (buffer, 1, 1024, file)))
 			MD5_Update (&context, buffer, len);
 		MD5_Final (digest, &context);
 

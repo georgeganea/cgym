@@ -41,7 +41,7 @@ FILE_INFO* list(char* dirname){
 			 continue;
 		 if ((strcmp(d->d_name,".")==0) ||(strcmp(d->d_name,"..")==0))
 			 continue;
-		 if (lstat(d->d_name,&buf)!=0){
+		 if (stat(d->d_name,&buf)<0){
 			 fprintf(stderr,"lstat error");
 			 continue;
 		 }

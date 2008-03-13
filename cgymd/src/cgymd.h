@@ -20,4 +20,10 @@ FILE_INFO* list(char* dirname);
 
 char* get(char* start, char* stop, char* filename);
 
+/*
+ * Function that returns the size of a file
+ */ 
+
+char* size(char* filename);
+
 #endif /*CGYMD_H_*/

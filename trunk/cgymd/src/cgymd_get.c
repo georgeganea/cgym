@@ -49,6 +49,7 @@ char* get(char* start, char* stop, char* filename){
 		return NULL;
 	}
 	*(buff+(end_position-start_position)) = '\0';
+	fclose(f);
 	return buff;
 }
 

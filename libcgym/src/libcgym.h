@@ -4,6 +4,7 @@
 
 #define CGYM_DEFAULT_PORT 2496
 #define CGYM_ACK_MESSAGE "CGYM\r\n"
+#define CGYM_ERR_MESSAGE "ERR\r\n"
 
 typedef struct cgym_server_t_ cgym_server_t;
 

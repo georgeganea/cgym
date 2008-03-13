@@ -10,13 +10,18 @@
 #include <sys/socket.h>
 #define MAXDATASIZE 100 
 int cgym_list(cgym_server_t *s, char *path) {
-	printf("creating socket and sending LIST to server\n");
+	printf("creating socket and connecting to server\n");
 	cgym_sock_t *my_socket =  cgym_sock_create(s);
 	if (cgym_sock_connect(my_socket)==0){
-		printf("ne-am conectat, amu trimitem %s\n",path);
+		sleep(1);
+		printf("ne-am conectat, amu trimitem LIST%s\n",path);
+		cgym_sock_clear(my_socket);
 	cgym_send_list_req(my_socket,path);
 	
 	}
+	
+	cgym_recv_list_reply(my_socket,NULL);
+	//cgym_recv_list_reply(my_socket,NULL);
 //	cgym_list_get(my_socket,  path, my_entry);
 	
 	printf("requesting list of directory %s from\n", path);

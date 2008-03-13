@@ -92,6 +92,16 @@ void* client_handler(void *p){
 		 
 	}
 	*/
+	//exemplu de folosire a functiei get
+	/*
+	char* file_contents = get("0","219","/home/ioana/Desktop/Icons/readme.txt");
+	if (file_contents == NULL){
+		printf("Eroare\n");
+	}
+	else{
+		printf("%s\n",file_contents);
+	}
+	*/
 	close(fd);
 	pthread_exit(NULL);
 }

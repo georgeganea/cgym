@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include "libcgym.h"
+#include "cgymd.h"
 
 #define BACKLOG 10     // how many pending connections queue will hold
 
@@ -80,7 +81,17 @@ void* client_handler(void *p){
 	int fd = *(int*)p;
 	if (send(fd, CGYM_ACK_MESSAGE, strlen(CGYM_ACK_MESSAGE), 0) == -1)
 	      perror("send");
-	compute_md5("/home/ioana/Desktop/todo.txt");
+	//exemplu de folosire a functiei list
+	/*
+	FILE_INFO* file_info;
+	file_info = list("/home/ioana/Desktop/Icons/");
+		
+	while (file_info->next) { 
+		printf("%s\n",cgym_entry_file(file_info->entry_file));
+		file_info = file_info->next; 
+		 
+	}
+	*/
 	close(fd);
 	pthread_exit(NULL);
 }

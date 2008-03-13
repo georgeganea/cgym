@@ -7,39 +7,71 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include "libcgym.h"
+#include "cgymd.h"
 
-void list(char* dirname){
+/*
+ * The function returns a list of files and directories in dirname
+ * On success, the first element of the list is the on that was requested
+ * information for. On error, the function returns null;
+ */
+
+FILE_INFO* list(char* dirname){
 	DIR *dp = NULL;
 	struct dirent *d;
 	struct stat buf;
+	FILE_INFO *files_head = NULL;
+	FILE_INFO *files_curr;
 	
 	printf("Directorul:%s\n",dirname);
 	if ((dp = opendir(dirname))==NULL){
 		perror("opendir");
-		return;
+		return NULL;
 	}
 	 if (chdir(dirname) !=0){
 	    perror("chdir");
-	    return;
+	    return NULL;
 	 }
-	while(d = readdir(dp)){
-		if (d->d_ino == 0)
-			continue;
-		if ((strcmp(d->d_name,".")==0) ||(strcmp(d->d_name,"..")==0))
-				continue;
-		if (lstat(d->d_name,&buf)!=0){
-			fprintf(stderr,"lstat error");
-			continue;
-		}
-		if (S_ISDIR(buf.st_mode)){
-			cgym_entry_t* entry;
-			entry =	cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,buf.st_size);
-			printf("%s\n",cgym_entry_file(entry));
-		}
-		else if (S_ISREG(buf.st_mode)){
-			cgym_entry_t* entry;
-			entry = cgym_entry_init(d->d_name,compute_md5(d->d_name),CGYM_ENTRY_FILE,buf.st_size);
-			printf("%s\n",cgym_entry_file(entry));
-		}
-	}
+	 cgym_entry_t* first_entry;
+	 first_entry = cgym_entry_init(dirname,NULL,CGYM_ENTRY_NONE,0);
+	 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
+	 		fprintf(stderr,"Eroare la malloc\n");
+	 		return NULL;
+	 }
+	 files_curr->entry_file = first_entry;
+	 files_curr->next = files_head;
+	 files_head = files_curr;
+	 
+	 while((d = readdir(dp))!=NULL){
+		 if (d->d_ino == 0)
+			 continue;
+		 if ((strcmp(d->d_name,".")==0) ||(strcmp(d->d_name,"..")==0))
+			 continue;
+		 if (lstat(d->d_name,&buf)!=0){
+			 fprintf(stderr,"lstat error");
+			 continue;
+		 }
+		 if (S_ISDIR(buf.st_mode)){
+			 cgym_entry_t* entry;
+			 entry =	cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,buf.st_size);
+			 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
+				 fprintf(stderr,"Eroare la malloc\n");
+				 return NULL;
+			 }
+			 files_curr->entry_file = entry;
+			 files_curr->next = files_head;
+			 files_head = files_curr;
+		 }
+		 else if (S_ISREG(buf.st_mode)){
+			 cgym_entry_t* entry;
+			 entry = cgym_entry_init(d->d_name,compute_md5(d->d_name),CGYM_ENTRY_FILE,buf.st_size);
+			 if ((files_curr =(FILE_INFO *) malloc(sizeof(FILE_INFO))) == NULL) {
+				 fprintf(stderr,"Eroare la malloc\n");
+				 return NULL;
+			 }
+			 files_curr->entry_file = entry;
+			 files_curr->next = files_head;
+			 files_head = files_curr;
+		 }
+	 }
+	 return files_head;
 }

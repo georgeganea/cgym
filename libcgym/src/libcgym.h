@@ -84,4 +84,10 @@ int cgym_send_get_req(cgym_sock_t *sock, cgym_segment_t *s);
 int cgym_recv_get_reply(cgym_sock_t *sock, cgym_segment_t *s);
 
 int cgym_segment_assemble(FILE *fd, cgym_segment_t **s);
+
+/*MD5 functions*/
+
+char* compute_md5(char* filename);
+void MD5Print (unsigned char digest[16]);
+
 #endif /*LIBCGYM_H_*/

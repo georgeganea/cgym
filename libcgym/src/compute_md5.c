@@ -1,6 +1,7 @@
 #include "libcgym.h"
 #include <openssl/md5.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 char* compute_md5(char* filename){
@@ -9,7 +10,6 @@ char* compute_md5(char* filename){
 	int len;
 	unsigned char buffer[1024], digest[16];
 	char* sir;
-
 	if ((file = fopen (filename, "rb")) == NULL)
 		perror("fopen");
 	else {
@@ -25,12 +25,12 @@ char* compute_md5(char* filename){
 		printf ("\n");
 	}
 	int i;
-	sir = malloc(sizeof(digest)+1);
+	sir = malloc(2*sizeof(digest)+1);
 	for (i = 0; i < 16; i++) { 
 		sprintf(sir + i * 2, "%02x", digest[i]);
 	}
 	return sir;
-	
+	printf("%s",sir);
 }
 
 void MD5Print (unsigned char digest[16]){

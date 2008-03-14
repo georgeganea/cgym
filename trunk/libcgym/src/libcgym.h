@@ -3,8 +3,11 @@
 #include <stdio.h>
 
 #define CGYM_DEFAULT_PORT 2496
-#define CGYM_ACK_MESSAGE "CGYM\r\n"
-#define CGYM_ERR_MESSAGE "ERR\r\n"
+#define CGYM_ACK_MSG "CGYM\r\n"
+#define CGYM_ERR_MSG "ERR\r\n"
+#define CGYM_SIZE_MSG "SIZE %s\r\n"
+#define CGYM_GET_MSG "GET %s\r\n"
+#define CGYM_QUIT_MSG "QUIT\r\n"
 
 typedef struct cgym_server_t_ cgym_server_t;
 

@@ -8,7 +8,7 @@
 #define CGYM_SIZE_MSG "SIZE %s\r\n"
 #define CGYM_GET_MSG "GET %s\r\n"
 #define CGYM_QUIT_MSG "QUIT\r\n"
-
+#define CGYM_END_MSG "\r\n"
 typedef struct cgym_server_t_ cgym_server_t;
 
 /*

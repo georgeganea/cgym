@@ -43,7 +43,74 @@ int cgym_send_size_req(cgym_sock_t *sock, char *file) {
  *	2 la eroare
  */
 int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
-	return 0;
+	int rc = 0;
+	char *ptr;
+	cgym_entry_t *entry = NULL;
+	
+	if (sock != NULL) {
+		if (e != NULL) {
+			if (sock->state == CGYM_SOCK_CONNECTED) { // cerere noua
+				sock->state = CGYM_SOCK_RECV_SIZE_REPLY;
+			}
+			
+			if (sock->state == CGYM_SOCK_RECV_SIZE_REPLY) {
+				rc = cgym_recv(sock, strlen(CGYM_OK_MSG));
+				
+				if (rc == 0) {
+					// am primit tot raspunsul (OK ?)
+					if (strncmp(sock->buf, CGYM_OK_MSG, strlen(CGYM_OK_MSG))) {
+						// serverul a raspuns (probabil) cu ERR\r\n
+						rc = 2;
+						printf("NU E OK: %4s...\n", sock->buf);
+						sock->state = CGYM_SOCK_CONNECTED;
+					}
+				} else if (rc > 1) {
+					sock->state = CGYM_SOCK_CONNECTED;
+				} // else -- incomplet
+			}
+			
+			if (sock->state == CGYM_SOCK_RECV_SIZE_DATA) {
+				rc = cgym_recv(sock, MAX_LINE_LEN);
+				
+				if (rc == 0) {
+					// am primit tot.. ne uitam daca chiar e tot
+				} else if (rc == 1) {
+					// am primit ceva?
+					if (sock->pos_recv > 0) {
+						if (
+							(ptr = memchr(sock->buf, '\r', sock->pos_recv)) != NULL
+							&&
+							(memchr(sock->buf, '\n', sock->pos_recv)) == ptr+1
+							)
+						{
+							/*
+							 * am gasit un sfarsit de linie
+							 * 
+							 * linia care ne intereseaza incepe de la sock->buf
+							 * si se termina la ptr+2 (exclusiv)
+							 */
+							if ((entry = cgym_entry_init_raw(sock->buf))
+																	!= NULL) {
+								// am gasit ceva!
+								printf("AM GASIT!!!\n");
+								cgym_entry_info(entry);
+								printf("\n");
+							}
+						}
+							
+					}
+				} else {
+					sock->state = CGYM_SOCK_CONNECTED;
+				}
+			}
+		} else {
+			rc = 3;
+		}
+	} else {
+		rc = 2;
+	}
+	
+	return rc;
 }
 
 /*

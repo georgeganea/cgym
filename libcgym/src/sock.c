@@ -49,6 +49,7 @@ int cgym_sock_clear(cgym_sock_t *sock) {
 	if (sock != NULL) {
 		sock->capacity = 0;
 		sock->pos_recv = 0;
+		sock->pos_send = 0;
 		if (sock->buf != NULL) {
 			free(sock->buf);
 		}
@@ -109,9 +110,12 @@ void cgym_sock_print_info(cgym_sock_t *sock) {
 			case CGYM_SOCK_IDLE: ptr = "IDLE"; break;
 			case CGYM_SOCK_CONNECTING: ptr = "CONNECTING"; break;
 			case CGYM_SOCK_RECV_HANDSHAKE: ptr = "RECV_HANDSHAKE"; break;
+			case CGYM_SOCK_CONNECTED: ptr = "CONNECTED"; break;
 			case CGYM_SOCK_RECV_LIST: ptr = "RECV_LIST"; break;
-			case CGYM_SOCK_RECV_SIZE: ptr = "RECV_SIZE"; break;
+			case CGYM_SOCK_RECV_SIZE_REPLY: ptr = "RECV_SIZE_REPLY"; break;
+			case CGYM_SOCK_RECV_SIZE_DATA: ptr = "RECV_SIZE_DATA"; break;
 			case CGYM_SOCK_RECV_DATA: ptr = "RECV_DATA"; break;
+			
 			case CGYM_SOCK_ERR: ptr = "ERR"; break;
 			default: ptr = "Unknown state"; break;
 		}
@@ -131,8 +135,8 @@ void cgym_sock_print_info(cgym_sock_t *sock) {
  */
 void cgym_sock_free(cgym_sock_t *sock) {
 	if (sock != NULL) {
-		if (sock->state == CGYM_SOCK_RECV_SIZE
-				|| sock->state == CGYM_SOCK_RECV_DATA) { // connected
+		if (sock->state != CGYM_SOCK_NONE
+				&& sock->state != CGYM_SOCK_IDLE) { // connected
 			close(sock->sockfd);
 		}
 		
@@ -193,7 +197,7 @@ int cgym_sock_connect(cgym_sock_t *sock) {
 	struct hostent *he;
     struct sockaddr_in their_addr; // connector's address information
     socklen_t lon = sizeof(optval);
-	
+    
 	if (sock != NULL) {
 		if (sock->state == CGYM_SOCK_IDLE) {
 			if ((he=gethostbyname(sock->server->addr)) != NULL) {  // get the host info
@@ -379,6 +383,8 @@ int cgym_recv_handshake(cgym_sock_t *sock) {
 		if (strncmp(sock->buf, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG))) {
 			// nu e bun
 			rc = 2;
+		} else {
+			cgym_sock_clear(sock);
 		}
 	} else if (rc > 1) {
 		// eroare

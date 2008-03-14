@@ -131,7 +131,7 @@ void* client_handler(void *p){
 	char * command,**li,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
 	char *buffer,*s=NULL;
 	int r=-1,n=0,size=0,i,t,wrds=0; 
-	if (send(fd, CGYM_ACK_MESSAGE, strlen(CGYM_ACK_MESSAGE), 0) == -1){
+	if (send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG), 0) == -1){
 	      perror("send");
 	      exit(1);
 	}
@@ -150,7 +150,7 @@ void* client_handler(void *p){
 		}
 	} while(r==sizeof(bu));
 	if((s[size-3]!='\r')||(s[size-2]!='\n')){
-		if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 			perror("send");
 		    exit(1);
 		}
@@ -162,7 +162,7 @@ void* client_handler(void *p){
 		}
 		//check command
 		if((r=checkCommand(command))<0){
-			if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
 				exit(1);
 			}
@@ -176,13 +176,13 @@ void* client_handler(void *p){
 				strncpy(dir,temp,strlen(temp));
 				strncpy(temp,"",strlen(temp));
 				if(dir==NULL){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
 				}
 				if(strcmp(homedir,dir)>0){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
@@ -194,19 +194,19 @@ void* client_handler(void *p){
 				strncpy(file,temp,strlen(temp));
 				strncpy(temp,"",strlen(temp));
 				if(file==NULL){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
 				}
 				if(file!=strstr(file,homedir)){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
 				}
 				if(strcmp(homedir,file)>0){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
@@ -234,19 +234,19 @@ void* client_handler(void *p){
 					}
 				}
 				if((file==NULL)||(start==NULL)||(stop==NULL)){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
 				}
 				if(file!=strstr(file,homedir)){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 					    exit(1);
 					}
 				}
 				if(strcmp(homedir,file)>0){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 						exit(1);
 					}
@@ -255,7 +255,7 @@ void* client_handler(void *p){
 			}
 			case 3:{ //QUIT
 				if((strlen(temp)>0)&&((temp[0]!='\r')||(temp[1]!='\n'))){
-					if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 						perror("send");
 						exit(1);
 					}
@@ -265,7 +265,7 @@ void* client_handler(void *p){
 		}
 	}
 		if((temp=getNextArg(s,&t))&&(strcmp(temp,"\r\n")==0)){
-			if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
 			    exit(1);
 			}
@@ -282,7 +282,7 @@ void* client_handler(void *p){
 		FILE_INFO* file_info;
 		file_info = list(dir);
 		if(file_info==NULL){
-			if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
 			    exit(1);
 			}
@@ -298,7 +298,7 @@ void* client_handler(void *p){
 		char* file_contents = get(start,stop,file);
 			if (file_contents == NULL){
 			//	printf("Eroare\n");
-				if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+				if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 					perror("send");		
 					exit(1);
 				}

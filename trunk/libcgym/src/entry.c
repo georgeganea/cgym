@@ -44,6 +44,46 @@ cgym_entry_t *cgym_entry_init(char *file, char *md5,
 	return rc;
 }
 
+cgym_entry_t *cgym_entry_init_raw(char *str) {
+	enum cgym_entry_type type = CGYM_ENTRY_NONE;
+	unsigned long size;
+	char md5[MD5_STR_LEN+1], file[MAX_LINE_LEN+1], type_c, tmp[25];
+	cgym_entry_t *rc = NULL;
+	
+	if (str != NULL) {
+		sprintf(tmp, "%%c %%ld %%%ds %%%ds\r\n",
+					MD5_STR_LEN, MAX_LINE_LEN);
+		
+		if (sscanf(str, tmp, &type_c, &size, md5, file) == 4) {
+			switch (type_c) {
+				case '-': type = CGYM_ENTRY_FILE; break;
+				case 'd': type = CGYM_ENTRY_DIRECTORY; break;
+			}
+			
+			rc = cgym_entry_init(file, md5, type, size);
+		} // else eroare -- formatul e gresit
+	}
+	
+	return rc;
+}
+
+void cgym_entry_info(cgym_entry_t *e) {
+	if (e != NULL) {
+		char *tmp;
+		
+		switch (e->type) {
+			case CGYM_ENTRY_DIRECTORY: tmp="DIRECTORY"; break;
+			case CGYM_ENTRY_FILE: tmp="FILE"; break;
+			case CGYM_ENTRY_NONE: tmp="NONE"; break;
+			default: tmp="Unknown type";
+		}
+		
+		printf("entry:%s[len=%ld,md5=%s,type=%s]",
+						e->file, e->size, e->md5, tmp);
+	} else {
+		printf("(null)");
+	}
+}
 
 /*
  * returneaza tipul entry-ului { NONE, FILE, DIRECTORY }

@@ -3,8 +3,19 @@
 #include <stdio.h>
 
 #define CGYM_DEFAULT_PORT 2496
+
+/* 
+ * lungimea maxima a numelui unui fisier
+ */
+#define MAX_LINE_LEN	1024
+
+#define MD5_STR_LEN			32
+
 #define CGYM_ACK_MSG "CGYM\r\n"
+
+#define CGYM_OK_MSG "OK\r\n"
 #define CGYM_ERR_MSG "ERR\r\n"
+
 #define CGYM_SIZE_MSG "SIZE %s\r\n"
 #define CGYM_GET_MSG "GET %s\r\n"
 #define CGYM_QUIT_MSG "QUIT\r\n"
@@ -19,7 +30,6 @@ typedef struct cgym_server_t_ cgym_server_t;
  void cgym_server_info_free(cgym_server_t *server);
  void cgym_server_info_print(cgym_server_t *server);
   
-
 enum cgym_sock_state {
 	CGYM_SOCK_NONE,
 	CGYM_SOCK_IDLE,
@@ -27,7 +37,8 @@ enum cgym_sock_state {
 	CGYM_SOCK_RECV_HANDSHAKE,
 	CGYM_SOCK_CONNECTED,
 	CGYM_SOCK_RECV_LIST,
-	CGYM_SOCK_RECV_SIZE,
+	CGYM_SOCK_RECV_SIZE_REPLY,
+	CGYM_SOCK_RECV_SIZE_DATA,
 	CGYM_SOCK_RECV_DATA,
 	
 	CGYM_SOCK_ERR
@@ -52,6 +63,8 @@ typedef struct cgym_entry_t_ cgym_entry_t;
 
 cgym_entry_t *cgym_entry_init(char *file, char *md5,
 							int type, unsigned long size);
+cgym_entry_t *cgym_entry_init_raw(char *str);
+void cgym_entry_info(cgym_entry_t *e);
 int cgym_entry_type(cgym_entry_t *e);
 unsigned long cgym_entry_size(cgym_entry_t *e);
 char *cgym_entry_md5(cgym_entry_t *e);

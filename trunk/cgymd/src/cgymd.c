@@ -12,7 +12,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include "libcgym.h"
-
+#include "cgymd.h"
 #define BACKLOG 10     // how many pending connections queue will hold
 
 void *client_handler(void *p);
@@ -117,6 +117,10 @@ int checkCommand(char * cmd){
 	if(strcmp(tmp,"GET")==0) return 2;
 	if(strcmp(tmp,"QUIT")==0) return 3;
 	return -1;
+}
+int minOf2(int a,int b){
+	if(a>b) return b;
+	return a;
 }
 void* client_handler(void *p){
 
@@ -267,26 +271,56 @@ void* client_handler(void *p){
 			}
 		}
 	//exemplu de folosire a functiei list
-	/*
-	FILE_INFO* file_info;
-	file_info = list("/home/ioana/Desktop/Icons/");
-		
-	while (file_info->next) { 
-		printf("%s\n",cgym_entry_file(file_info->entry_file));
-		file_info = file_info->next; 
-		 
-	}
-	*/
+	
+	
 	//exemplu de folosire a functiei get
-	/*
-	char* file_contents = get("0","219","/home/ioana/Desktop/Icons/readme.txt");
-	if (file_contents == NULL){
-		printf("Eroare\n");
+	switch(r){
+	case 0:{
+		break;
 	}
-	else{
-		printf("%s\n",file_contents);
+	case 1:{
+		FILE_INFO* file_info;
+		file_info = list(dir);
+		if(file_info==NULL){
+			if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+				perror("send");
+			    exit(1);
+			}
+		}
+		printf("IN LIST!\n");
+		while (file_info->next) { 
+			printf("%s\n",cgym_entry_file(file_info->entry_file));
+			file_info = file_info->next; 
+		}
+		break;
 	}
-	*/
+	case 2:{
+		char* file_contents = get(start,stop,file);
+			if (file_contents == NULL){
+			//	printf("Eroare\n");
+				if (send(fd, CGYM_ERR_MESSAGE, strlen(CGYM_ERR_MESSAGE), 0) == -1){
+					perror("send");		
+					exit(1);
+				}
+			}
+			else{
+				unsigned long dim=strlen(file_contents);
+				int j;
+				for(j=0;j<(int)(dim/MAX_SIZE);j++){
+					if (send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE), 0) == -1){
+						perror("send");		
+						exit(1);
+					}
+				}
+			}
+		break;
+	}
+	case 3:{
+		break;
+	}
+	}
+	
+	
 
 	printf("COMANDA:%s\n",command);
 	printf("DIR:%s\n",dir);

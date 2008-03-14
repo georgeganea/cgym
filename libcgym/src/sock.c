@@ -372,11 +372,11 @@ int cgym_send(cgym_sock_t *sock, char *buf, unsigned long len) {
  * 	>1 la eroare
  */
 int cgym_recv_handshake(cgym_sock_t *sock) {
-	int rc = cgym_recv(sock, strlen(CGYM_ACK_MESSAGE));
+	int rc = cgym_recv(sock, strlen(CGYM_ACK_MSG));
 	
 	if (rc == 0) {
 		// am primit tot
-		if (strncmp(sock->buf, CGYM_ACK_MESSAGE, strlen(CGYM_ACK_MESSAGE))) {
+		if (strncmp(sock->buf, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG))) {
 			// nu e bun
 			rc = 2;
 		}
@@ -393,7 +393,18 @@ int cgym_recv_handshake(cgym_sock_t *sock) {
  * 
  * Returneaza
  * 	0 la succes
- * 	1 la incomplet
  * 	2 la eroare
  */
-int cgym_send_quit(cgym_sock_t *sock);
+int cgym_send_quit(cgym_sock_t *sock) {
+	int rc = 0;
+	
+	if (sock != NULL) {
+		do {
+			rc = cgym_send(sock, CGYM_QUIT_MSG, strlen(CGYM_QUIT_MSG));
+		} while (rc == 1); // inca nu a terminat
+	} else {
+		rc = 2;
+	}
+	
+	return rc;
+}

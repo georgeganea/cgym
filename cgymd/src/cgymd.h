@@ -1,7 +1,7 @@
 #ifndef CGYMD_H_
 #define CGYMD_H_
 #include "libcgym.h"
-
+#define MAX_SIZE 10
 /*
  * Structure and function for obtaining the contents of a directory
  */

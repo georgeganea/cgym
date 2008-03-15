@@ -139,6 +139,9 @@ void* client_handler(void *p){
 	      pthread_exit(NULL);
 	}
 	do{
+		for(i=0;i<20;i++){
+			bu[i]='\0';
+		}
 		if((r=recv(fd,bu,sizeof(bu),0))>0){
 			n+=r;
 			if((buffer=realloc(s,n))){
@@ -153,6 +156,7 @@ void* client_handler(void *p){
 		}
 	} while(r==sizeof(bu));
 	
+	printf("COM:%s\n",s);
 	if((s[size-3]!='\r')||(s[size-2]!='\n')){
 		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 			perror("send");
@@ -160,7 +164,7 @@ void* client_handler(void *p){
 		}
 	}
 	
-	s[size-3]=' ';s[size-2]=' ';
+	s[size-3]=' ';s[size-2]=' ';	
 	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	printf("INCEPUT\n");
 	i=0;
@@ -204,7 +208,7 @@ void* client_handler(void *p){
 	case 0 :{ //LIST
 		dir=malloc(strlen(arg1)+1);
 		strcpy(dir,arg1);
-		
+		printf("DIR%s\n",dir);
 		FILE_INFO* file_info;
 		file_info = list(dir);
 		if(file_info==NULL){
@@ -213,6 +217,7 @@ void* client_handler(void *p){
 				pthread_exit(NULL);
 			}
 		}
+		
 		if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);

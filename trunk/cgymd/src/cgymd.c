@@ -28,8 +28,8 @@ int main(int argc, char**argv){
 		fprintf(stderr,"usage:%s directory [port]",argv[0]);
 		exit(1);
 	}
-	homedir=malloc(strlen(argv[1])*sizeof(char));
-	strncpy(homedir,argv[1],strlen(argv[1]));
+	homedir=malloc(strlen(argv[1])+1);
+	strcpy(homedir,argv[1]);
 	if (argc==2){
 		printf("Using default port:%d\n",CGYM_DEFAULT_PORT);
 		port = CGYM_DEFAULT_PORT;

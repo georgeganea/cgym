@@ -157,14 +157,14 @@ void* client_handler(void *p){
 	} while(r==sizeof(bu));
 	
 	printf("COM:%s\n",s);
-	if((s[size-3]!='\r')||(s[size-2]!='\n')){
+	if((s[size-2]!='\r')||(s[size-1]!='\n')){
 		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		}
 	}
 	
-	s[size-3]=' ';s[size-2]=' ';	
+	s[size-2]=' ';s[size-1]=' ';	
 	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	printf("INCEPUT\n");
 	i=0;
@@ -225,9 +225,11 @@ void* client_handler(void *p){
 		printf("IN LIST!\n");
 		while (file_info->next) { 
 			char *buffer=cgym_entry_tostring(file_info->entry_file);
+			printf("BUFFER=%s\n",buffer);
 			unsigned long dim=strlen(buffer);
 			int j;
 			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
+				//printf("Send  %d\n",j);
 				if (send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
 					perror("send");		
 					pthread_exit(NULL);
@@ -235,10 +237,12 @@ void* client_handler(void *p){
 			}
 			file_info = file_info->next; 
 		}
+		printf("AICICICI\n");
 		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		}
+		printf("AICICICI\n");
 		break;
 	}
 	case 1 :{ //SIZE
@@ -305,6 +309,7 @@ void* client_handler(void *p){
 		}
 	}
 	}
+	printf("Sfarsit\n");
 	/*
 	printf("SFARSIT\n");
 	printf("COMANDA:%s\n",command);

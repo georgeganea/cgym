@@ -16,12 +16,14 @@ int cgym_send_list_req(cgym_sock_t *sock, char *dir){
 	
 	int socket = cgym_sock_get_sockfd(sock);
 	int i;
-	char * message = malloc(strlen(dir)+7);//LIST +strlen(dir)+\r\n
-	strcpy(message,"LIST ");
-	strcat(message,dir);
-	printf("mesajul inatinte de o si n :%s\n",message);
-	message[strlen(message)+1]='\r';// \0 = \r
-	message[strlen(message)+2]='\n';// se adauga si \n
+	char * message = malloc(strlen(dir)+8);//LIST +strlen(dir)+\r\n
+	//strcpy(message,"LIST ");
+	//strcat(message,dir);
+	//printf("mesajul inatinte de o si n :%s\n",message);
+	//message[strlen(message)+1]='\r';// \0 = \r
+	//message[strlen(message)+2]='\n';// se adauga si \n
+	sprintf(message,"%s %s\r\n","LIST",dir);
+	printf("mesajul |%s|",message);
 	i=send(socket,message,strlen(message),0);
 	printf("numarul de octeti trimisi:%d\n",i);
 	if (i)

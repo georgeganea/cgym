@@ -48,7 +48,13 @@ int cgym_get(char *remote, char *local, int segments, cgym_server_t **servers) {
  	}
  	
  	cgym_entry_info(e);
+ 	printf("\n");
  	
+ 	cgym_sock_info(sock);
+ 	printf("\n"
+ 			"Avem informatiile. Cerem fisierul...\n");
+ 	
+ 	/*	
  	if ((segm = malloc(sizeof(*segm) * segments)) == NULL) {
  		perror("malloc");
  		return 8;
@@ -56,8 +62,20 @@ int cgym_get(char *remote, char *local, int segments, cgym_server_t **servers) {
  	
  	for (i = 0; i < segments; i++) {
  	}
+ 	*/
  	
- 	printf("GATA!\n");
-	
+ 	if ((i = cgym_send_get_req(sock,
+ 					cgym_segment_init(sock, e, 0, 1) )) != 0) {
+ 		cgym_sock_info(sock);
+ 		printf("Error[%d]: Could not request file content.\n", i);
+ 		return 3;
+ 	}
+ 	
+ 	if ((i = cgym_recv_get_reply(sock, NULL)) != 0) {
+ 		cgym_sock_info(sock);
+ 		printf("Error[%d]: Could not get file content.\n", i);
+ 		return 4;
+ 	}
+ 	
 	return 0;
 }

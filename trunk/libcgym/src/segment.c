@@ -109,10 +109,8 @@ char *cgym_segment_buf(cgym_segment_t *s) {
  */
 void cgym_segment_free(cgym_segment_t *s) {
 	if (s != NULL) {
-		free(s->entry);
-		free(s->sock);
+		free(s);
 	}
-	free(s);
 }
 
 /*

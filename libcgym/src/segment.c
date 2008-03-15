@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "libcgym.h"
 #include "libcgym_priv.h"
+#include <string.h>
 
 /*
  * initializeaza segmentul cu entry-ul e, octetul de inceput start (inclusiv)
@@ -155,7 +156,41 @@ void cgym_segment_free(cgym_segment_t *s) {
  *	0 la succes
  *	1 la eroare
  */
-int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
+/*
+ * asambleaza segmentele s si le scrie in fd
+ * lista s se termina cu elementul NULL
+ *
+ * returneaza:
+ *	0 la succes
+ *	1 la eroare
+ */
+int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s){
+	FILE *f = fopen(e->file,"w+");
+	int i=0;
+	int k=0;
+	while((s[k])!=NULL){
+		if ((((s[k])->stop) - ((s[k])->start) - (strlen((s[k])->buf))+1)!=0){
+			printf("pozitiile si lungimea bufferului nu corespund la segmentul care incepe la offset:%ld\n",(*s)->start);
+		}
+		if (!fseek(f,(s[k])->start,SEEK_SET)){
+			for (i=((s[k])->start);i<=((s[k])->stop);i++){
+				fputc(((s[k])->buf[i-((s[k])->start)]),f);
+			}
+		}
+		else{
+			perror("fseek");
+			return 1;
+		}
+		k++;
+	}
+	fclose(f);
+	if(strcmp(md5,compute_md5(e->file))!=0){
+		printf("md5 check failed\n");
+		return 1;
+	}
+	printf("md5:%s\n",compute_md5(e->file));
+	return 0;
+}
 
 /*
  * verifica daca toate segmentele din lista

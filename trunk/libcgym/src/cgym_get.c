@@ -95,12 +95,19 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 								*e = entry;
 								
 								// am terminat
+								sock->state = CGYM_SOCK_CONNECTED;
+								cgym_sock_clear(sock);
 								rc = 0;
 							} else {
 								rc = 5;
 							}
+						} else {
+							// mai trebuie sa citim
+							printf("incomplet. mai trebuie citit...\n");
 						}
-					} // else -- nu avem ce citi pe moment
+					} else {
+						printf("nu avem ce citi pe moment!\n");
+					}
 				} else if (rc == 0) {
 					printf("Nu se poate!\n");
 					rc = 4;
@@ -113,6 +120,11 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 		}
 	} else {
 		rc = 2;
+	}
+	
+	if (rc > 1) { // o eroare -- eliberam buffer-ul
+		printf("Eliberam buffer-ul...\n");
+		cgym_sock_clear(sock);
 	}
 	
 	return rc;
@@ -169,5 +181,7 @@ int cgym_send_get_req(cgym_sock_t *sock, cgym_segment_t *s) {
  *	2 la eroare
  */
 int cgym_recv_get_reply(cgym_sock_t *sock, cgym_segment_t *s) {
+	int rc = cgym_recv(sock, 30);
+	
 	return 0;
 }

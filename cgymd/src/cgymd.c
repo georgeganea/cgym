@@ -181,13 +181,19 @@ void* client_handler(void *p){
 		dir=malloc(strlen(arg1)+1);
 		strcpy(dir,arg1);
 		printf("DIR%s\n",dir);
+		if(strstr(dir,homedir)==NULL){ //directorul cerul nu apatine directorului dat la share
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+				perror("send");
+			}
+			pthread_exit(NULL);
+		}
 		FILE_INFO* file_info;
 		file_info = list(dir);
 		if(file_info==NULL){
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
-				pthread_exit(NULL);
 			}
+			pthread_exit(NULL);
 		}
 		
 		if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
@@ -218,14 +224,20 @@ void* client_handler(void *p){
 	case 1 :{ //SIZE
 		file=malloc(strlen(arg1)+1);
 		strcpy(file,arg1);
+		if(strstr(file,homedir)==NULL){ //fisierul cerul nu apatine directorului dat la share
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+				perror("send");
+			}
+			pthread_exit(NULL);
+		}
 		printf("SIZE\n");
-		cgym_entry_t * entry_info = size("/home/carmen/Desktop/ioana.txt");
+		cgym_entry_t * entry_info = size(file);
 		char *buffer;//=cgym_entry_tostring(entry_info);
 		if(entry_info==NULL){
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
-				pthread_exit(NULL);
 			}
+			pthread_exit(NULL);
 		}
 		buffer=cgym_entry_tostring(entry_info);
 		printf("BUFFER: %s\n",buffer);	
@@ -256,14 +268,20 @@ void* client_handler(void *p){
 		strcpy(stop,arg2);
 		file=malloc(strlen(arg3)+1);
 		strcpy(file,arg3);
+		if(strstr(file,homedir)==NULL){ //fisierul cerul nu apatine directorului dat la share
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+				perror("send");
+			}
+			pthread_exit(NULL);
+		}
 		
 		char* file_contents = get(start,stop,file);
 		if (file_contents == NULL){
 			//	printf("Eroare\n");
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");		
-				pthread_exit(NULL);
 			}
+			pthread_exit(NULL);
 		}
 		else{
 			if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){

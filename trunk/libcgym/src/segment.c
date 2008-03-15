@@ -17,6 +17,7 @@ cgym_segment_t *cgym_segment_init(cgym_sock_t *s, cgym_entry_t *e,
 		rc->start = start;
 		rc->stop = stop;
 		
+		rc->status = CGYM_SEGMENT_IDLE;
 		rc->buf = NULL;
 	}
 	
@@ -101,6 +102,37 @@ char *cgym_segment_buf(cgym_segment_t *s) {
 	
 	return rc;
 }
+
+/*
+ * returneaza valoarea campului sock
+ */
+enum cgym_segment_status cgym_segment_status(cgym_segment_t *s) {
+	enum cgym_segment_status rc = CGYM_SEGMENT_NONE;
+	
+	if (s != NULL) {
+		rc = s->status;
+	}
+	
+	return rc;
+}
+
+/* modifica valoarea campului status
+ * returneaza
+ * 
+ * 	0 la succes
+ * 	1 la eroare (s este NULL)
+ */
+int cgym_segment_set_status(cgym_segment_t *s, enum cgym_segment_status st) {
+	int rc = 0;
+	
+	if (s != NULL) {
+		s->status = st;
+	} else {
+		rc = 1;
+	}
+	
+	return rc;
+}
 	
 /*
  * elibereaza resursele segmentului
@@ -121,4 +153,16 @@ void cgym_segment_free(cgym_segment_t *s) {
  *	0 la succes
  *	1 la eroare
  */
-int cgym_segment_assemble(FILE *fd, cgym_segment_t **s);
+int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
+
+/*
+ * verifica daca toate segmentele din lista
+ * sunt terminate
+ * 
+ * returneaza
+ * 0 daca nu
+ * 1 daca da
+ */
+int cgym_segment_done(cgym_segment_t **s) {
+	
+}

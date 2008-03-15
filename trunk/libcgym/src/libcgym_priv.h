@@ -29,6 +29,7 @@ struct cgym_segment_t_ {
         unsigned long start;
         unsigned long stop;
         
+        enum cgym_segment_status status;
         char *buf;
 };
 

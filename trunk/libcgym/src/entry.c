@@ -88,8 +88,8 @@ void cgym_entry_info(cgym_entry_t *e) {
 /*
  * returneaza tipul entry-ului { NONE, FILE, DIRECTORY }
  */
-int cgym_entry_type(cgym_entry_t *e) {
-	int rc = CGYM_ENTRY_NONE;
+enum cgym_entry_type cgym_entry_type(cgym_entry_t *e) {
+	enum cgym_entry_type rc = CGYM_ENTRY_NONE;
 	
 	if (e != NULL) {
 		rc = e->type;

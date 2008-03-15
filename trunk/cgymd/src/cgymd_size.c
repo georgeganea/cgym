@@ -13,15 +13,18 @@
  * The function returns the size of the file given as argument
  */
 
-cgym_entry_t* size(char* filename){
+cgym_entry_t* size(char* path, char* filename){
 	struct stat buf;
-	if (stat(filename,&buf)<0){
-		fprintf(stderr,"Stat error\n");
+	char* pathname = malloc(strlen(path)+strlen(filename)+1);
+	strcpy(pathname, path);
+	strcat(pathname, filename);
+	if (stat(pathname,&buf)<0){
+		fprintf(stderr,"stat error\n");
 		return NULL;
 	}
 	if (S_ISREG(buf.st_mode)){
 		cgym_entry_t* entry;
-		entry = cgym_entry_init(filename, compute_md5(filename), CGYM_ENTRY_FILE, buf.st_size);
+		entry = cgym_entry_init(filename, compute_md5(pathname), CGYM_ENTRY_FILE, buf.st_size);
 		return entry;
 	}
 	return NULL;

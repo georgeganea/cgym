@@ -2,13 +2,21 @@
 #include <limits.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <string.h>
 #include "libcgym.h"
 #include "cgymd.h"
 
-char* get(char* start, char* stop, char* filename){
+char* get(char* start, char* stop, char* path, char* filename){
 	unsigned long start_position;
 	unsigned long end_position;
 	char* ep;
+	
+	char* pathname;
+	if ((pathname = malloc(strlen(path)+strlen(filename)+1))==NULL){
+		return NULL;
+	}
+	strcpy(pathname, path);
+	strcat(pathname, filename);
 	
 	start_position = strtoul(start, &ep, 10);
 	
@@ -35,7 +43,7 @@ char* get(char* start, char* stop, char* filename){
 	if (start_position >= end_position )
 		return NULL;
 	FILE* f;
-	if ((f= fopen(filename, "r"))==NULL){
+	if ((f= fopen(pathname, "r"))==NULL){
 		fprintf(stderr,"Eroare la fopen\n");
 		return NULL;
 	}

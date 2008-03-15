@@ -45,11 +45,17 @@ FILE_INFO* list(char* dirname){
 			 continue;
 		 }
 		 if (S_ISDIR(buf.st_mode)){
+			 char* dirname;
+			 dirname = malloc(strlen(dirname)+strlen(d->d_name)+1);
+			 sprintf(dirname,"%s%s",dirname,d->d_name);
 			 cgym_entry_t* entry;
 			 entry = cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,0);
 			 files_head = add_entry(entry,files_head);
 		 }
 		 else if (S_ISREG(buf.st_mode)){
+			 char* filename;
+			 filename = malloc(strlen(dirname)+strlen(d->d_name)+1);
+			 sprintf(dirname,"%s%s",dirname,d->d_name);
 			 cgym_entry_t* entry;
 			 entry = cgym_entry_init(d->d_name,compute_md5(d->d_name),CGYM_ENTRY_FILE,buf.st_size);
 			 files_head = add_entry(entry, files_head);

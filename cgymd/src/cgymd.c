@@ -103,22 +103,26 @@ char *getNextArg(char *line,int *space){
 	return tmp;
 
 }
-int checkCommand(char * cmd){	
-	char * tmp;
+int checkCommand(char* cmd){	
+	char* tmp;
 	int i;
-	tmp=malloc(strlen(cmd)*sizeof(char));
-	strncpy(tmp,cmd,strlen(cmd));
+	tmp=malloc(strlen(cmd)+1);
+	strcpy(tmp,cmd);
 	for(i=0;i<strlen(cmd);i++){
-		tmp[i]=toupper(tmp[i]);
+		*(tmp+i)=toupper(*(tmp+i));
 	}
-	if(strcmp(tmp,"LIST")==0) return 0;
-	if(strcmp(tmp,"SIZE")==0) return 1;
-	if(strcmp(tmp,"GET")==0) return 2;
-	if(strcmp(tmp,"QUIT")==0) return 3;
+	if(strcmp(tmp,"LIST")==0) 
+		return 0;
+	if(strcmp(tmp,"SIZE")==0) 
+		return 1;
+	if(strcmp(tmp,"GET")==0) 
+		return 2;
+	if(strcmp(tmp,"QUIT")==0) 
+		return 3;
 	return -1;
 }
 int minOf2(int a,int b){
-	return a > b ? a:b;
+	return a > b ? b:a;
 }
 
 void* client_handler(void *p){

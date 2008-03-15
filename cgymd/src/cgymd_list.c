@@ -22,6 +22,7 @@ FILE_INFO* list(char* dirname){
 	struct dirent *d;
 	struct stat buf;
 	FILE_INFO *files_head = NULL;
+	printf("Dirname:%s",dirname);
 	if ((dp = opendir(dirname))==NULL){
 		perror("opendir");
 		return NULL;

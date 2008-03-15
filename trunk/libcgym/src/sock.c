@@ -52,6 +52,7 @@ int cgym_sock_clear(cgym_sock_t *sock) {
 		sock->pos_send = 0;
 		if (sock->buf != NULL) {
 			free(sock->buf);
+			sock->buf = NULL;
 		}
 	} else {
 		rc = 1;
@@ -99,7 +100,7 @@ cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock) {
 /*
  * afiseaza la stdout informatii despre sock
  */
-void cgym_sock_print_info(cgym_sock_t *sock) {
+void cgym_sock_info(cgym_sock_t *sock) {
 	char *ptr;
 	
 	if (sock != NULL) {
@@ -288,14 +289,14 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 				rc = recv(sock->sockfd,
 						sock->buf + sock->pos_recv, len - sock->pos_recv, 0);
 				
-				/*
 				printf("received %d: %c%c...\n",
 							rc,
-							sock->buf[sock->pos],
-							sock->buf[sock->pos+1]);
-				*/
+							sock->buf[sock->pos_recv],
+							sock->buf[sock->pos_recv+1]);
 				
 				if (rc == len - sock->pos_recv) {
+					//sock->pos_recv += rc;
+					sock->pos_recv = 0;
 					rc = 0; // gata
 				} else if (rc > 0) {
 					// mai avem de primit
@@ -317,6 +318,10 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 	} else {
 		rc = 5;
 	}
+	
+	printf("end of sock_recv(): ");
+	cgym_sock_info(sock);
+	printf("\n");
 	
 	return rc;
 }

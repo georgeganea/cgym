@@ -27,28 +27,27 @@ int cgym_get(char *remote, char *local, int segments, cgym_server_t **servers) {
  		return 1;
  	}
  	
- 	if ((cgym_sock_connect(sock))) {
- 		cgym_sock_print_info(sock);
- 		printf("Error: Could not connect to ");
+ 	if ((i = cgym_sock_connect(sock)) != 0) {
+ 		cgym_sock_info(sock);
+ 		printf("Error[%d]: Could not connect to ", i);
  		cgym_server_info_print( cgym_sock_get_server(sock) );
  		printf("\n");
  		return 2;
  	}
  	
- 	if (cgym_send_size_req(sock, remote)) {
- 		cgym_sock_print_info(sock);
- 		printf("Error: Could not request file information.\n");
+ 	if ((i = cgym_send_size_req(sock, remote)) != 0) {
+ 		cgym_sock_info(sock);
+ 		printf("Error[%d]: Could not request file information.\n", i);
  		return 3;
  	}
  	
- 	if (cgym_recv_size_reply(sock, &e)) {
- 		cgym_sock_print_info(sock);
- 		printf("Error: Could not get file information.\n");
+ 	if ((i = cgym_recv_size_reply(sock, &e)) != 0) {
+ 		cgym_sock_info(sock);
+ 		printf("Error[%d]: Could not get file information.\n", i);
  		return 4;
  	}
  	
- 	printf("entry info: %s [%ld bytes, md5: %s]\n",
- 			cgym_entry_file(e), cgym_entry_size(e), cgym_entry_md5(e));
+ 	cgym_entry_info(e);
  	
  	if ((segm = malloc(sizeof(*segm) * segments)) == NULL) {
  		perror("malloc");

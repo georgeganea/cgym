@@ -324,6 +324,8 @@ void* client_handler(void *p){
 	printf("STOP:%s\n",stop);
 	printf("END!\n");
 	*/
+	free(arg1); free(arg2); free(arg3); free(command); free(dir); 
+	free(file); free(start); free(stop); 
 	close(fd);
 	pthread_exit(NULL);
 	

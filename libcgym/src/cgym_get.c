@@ -63,18 +63,19 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 						rc = 2;
 						printf("NU E OK: %4s...\n", sock->buf);
 						sock->state = CGYM_SOCK_CONNECTED;
+					} else {
+						printf("E OK: pos_recv = %ld\n", sock->pos_recv);
+						sock->state = CGYM_SOCK_RECV_SIZE_DATA;
 					}
 				} else if (rc > 1) {
 					sock->state = CGYM_SOCK_CONNECTED;
 				} // else -- incomplet
 			}
-			
+
 			if (sock->state == CGYM_SOCK_RECV_SIZE_DATA) {
-				rc = cgym_recv(sock, MAX_LINE_LEN);
+				rc = cgym_recv(sock, MAX_LINE_LEN + 1); // ca sa fim siguri ca nu primim tot
 				
-				if (rc == 0) {
-					// am primit tot.. ne uitam daca chiar e tot
-				} else if (rc == 1) {
+				if (rc == 1) {
 					// am primit ceva?
 					if (sock->pos_recv > 0) {
 						if (
@@ -91,14 +92,18 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 							 */
 							if ((entry = cgym_entry_init_raw(sock->buf))
 																	!= NULL) {
-								// am gasit ceva!
-								printf("AM GASIT!!!\n");
-								cgym_entry_info(entry);
-								printf("\n");
+								*e = entry;
+								
+								// am terminat
+								rc = 0;
+							} else {
+								rc = 5;
 							}
 						}
-							
-					}
+					} // else -- nu avem ce citi pe moment
+				} else if (rc == 0) {
+					printf("Nu se poate!\n");
+					rc = 4;
 				} else {
 					sock->state = CGYM_SOCK_CONNECTED;
 				}

@@ -50,7 +50,7 @@ int cgym_sock_clear(cgym_sock_t *sock);
 int cgym_sock_get_sockfd(cgym_sock_t *sock);
 int cgym_sock_get_state(cgym_sock_t *sock);
 cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
-void cgym_sock_print_info(cgym_sock_t *sock);
+void cgym_sock_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
 
 

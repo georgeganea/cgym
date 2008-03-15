@@ -28,6 +28,8 @@ struct cgym_segment_t_ {
         cgym_entry_t *entry;
         unsigned long start;
         unsigned long stop;
+        
+        char *buf;
 };
 
 /* Functii interne */

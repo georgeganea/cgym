@@ -17,12 +17,24 @@
 
 FILE_INFO* add_entry(cgym_entry_t* entry, FILE_INFO* head);
 
-FILE_INFO* list(char* dirname){
+FILE_INFO* list(char* dirpath){
 	DIR *dp = NULL;
 	struct dirent *d;
 	struct stat buf;
 	FILE_INFO *files_head = NULL;
-	printf("Dirname:%s",dirname);
+	char* dirname;
+	char* last = strrchr(dirpath,'/');
+	
+	if (strlen(last) > 2){
+		dirname = malloc(strlen(dirpath)+2);
+		strcpy(dirname,dirpath);
+		strcat(dirname,"/");
+	}
+	else{
+		dirname = malloc(strlen(dirpath)+1);
+		strcpy(dirname,dirpath);		
+	}
+	printf("%s",dirname);
 	if ((dp = opendir(dirname))==NULL){
 		perror("opendir");
 		return NULL;
@@ -45,20 +57,25 @@ FILE_INFO* list(char* dirname){
 			 continue;
 		 }
 		 if (S_ISDIR(buf.st_mode)){
-			 char* dirname;
-			 dirname = malloc(strlen(dirname)+strlen(d->d_name)+1);
-			 sprintf(dirname,"%s%s",dirname,d->d_name);
+			 char* dir;
+			 dir = malloc(strlen(dirname)+strlen(d->d_name)+1);
+			 strcpy(dir,dirname);
+			 strcat(dir,d->d_name);
+			 //sprintf(dir,"%s%s",dirname,d->d_name);
 			 cgym_entry_t* entry;
-			 entry = cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,0);
+			 entry = cgym_entry_init(dir,"-",CGYM_ENTRY_DIRECTORY,0);
 			 files_head = add_entry(entry,files_head);
+			 free(dir);
 		 }
 		 else if (S_ISREG(buf.st_mode)){
-			 char* filename;
-			 filename = malloc(strlen(dirname)+strlen(d->d_name)+1);
-			 sprintf(dirname,"%s%s",dirname,d->d_name);
+			 char* file;
+			 file = malloc(strlen(dirname)+strlen(d->d_name)+1);
+			 strcpy(file,dirname);
+			 strcat(file,d->d_name);
 			 cgym_entry_t* entry;
-			 entry = cgym_entry_init(d->d_name,compute_md5(d->d_name),CGYM_ENTRY_FILE,buf.st_size);
+			 entry = cgym_entry_init(file,compute_md5(d->d_name),CGYM_ENTRY_FILE,buf.st_size);
 			 files_head = add_entry(entry, files_head);
+			 free(file);
 		 }
 	 }
 	 closedir(dp);

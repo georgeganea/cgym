@@ -181,7 +181,7 @@ char * cgym_entry_tostring(cgym_entry_t *e){
 			char *md5 = e->md5;
 			char *file = e->file;
 			buf=malloc(strlen(tmp)+strlen(tmp2)+strlen(md5)+strlen(file)+6);
-			sprintf(buf,"%s %s %s %s\\r\\n",
+			sprintf(buf,"%s %s %s %s\r\n",
 							tmp,tmp2,e->md5,e->file);
 		}
 	return buf;

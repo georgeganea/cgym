@@ -76,33 +76,6 @@ int main(int argc, char**argv){
     }
 	return 0;
 }
-
-char *getNextArg(char *line,int *space){
-	int i,j=0,n=0;
-	char *tmp=NULL;
-	tmp=malloc(255*sizeof(char));
-	for(i=0;i<strlen(line);i++){
-		if((i==0)&&(isspace(line[i]))){
-			n++;
-			continue;
-		}
-		if(!isspace(line[i])){
-			tmp[j]=line[i];
-			j++;
-		}
-		else{
-			if((isspace(line[i-1]))&&(isspace(line[i]))){
-				n++;
-				continue;
-			}
-			*space=n;
-			return tmp;	
-		}
-	}
-	*space=n;
-	return tmp;
-
-}
 int checkCommand(char* cmd){	
 	char* tmp;
 	int i;
@@ -237,12 +210,10 @@ void* client_handler(void *p){
 			}
 			file_info = file_info->next; 
 		}
-		printf("AICICICI\n");
 		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		}
-		printf("AICICICI\n");
 		break;
 	}
 	case 1 :{ //SIZE

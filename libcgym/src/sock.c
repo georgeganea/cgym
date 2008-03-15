@@ -115,7 +115,8 @@ void cgym_sock_info(cgym_sock_t *sock) {
 			case CGYM_SOCK_RECV_LIST: ptr = "RECV_LIST"; break;
 			case CGYM_SOCK_RECV_SIZE_REPLY: ptr = "RECV_SIZE_REPLY"; break;
 			case CGYM_SOCK_RECV_SIZE_DATA: ptr = "RECV_SIZE_DATA"; break;
-			case CGYM_SOCK_RECV_DATA: ptr = "RECV_DATA"; break;
+			case CGYM_SOCK_RECV_DATA_REPLY: ptr = "RECV_DATA_REPLY"; break;
+			case CGYM_SOCK_RECV_DATA_DATA: ptr = "RECV_DATA_DATA"; break;
 			
 			case CGYM_SOCK_ERR: ptr = "ERR"; break;
 			default: ptr = "Unknown state"; break;
@@ -239,6 +240,8 @@ int cgym_sock_connect(cgym_sock_t *sock) {
 				sock->state = CGYM_SOCK_ERR;
 				rc = 5;
 			}
+			
+			sock->state = CGYM_SOCK_RECV_HANDSHAKE; // conectat
 		}
 		
 		if (!rc && sock->state == CGYM_SOCK_RECV_HANDSHAKE) {
@@ -290,10 +293,11 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 				rc = recv(sock->sockfd,
 						sock->buf + sock->pos_recv, len - sock->pos_recv, 0);
 				
-				printf("received %d: %c%c...\n",
-							rc,
-							sock->buf[sock->pos_recv],
-							sock->buf[sock->pos_recv+1]);
+				if (rc > 0)
+					printf("received %d: %c%c...\n",
+								rc,
+								sock->buf[sock->pos_recv],
+								sock->buf[sock->pos_recv+1]);
 				
 				if (rc == len - sock->pos_recv) {
 					//sock->pos_recv += rc;
@@ -411,6 +415,8 @@ int cgym_send_quit(cgym_sock_t *sock) {
 	int rc = 0;
 	
 	if (sock != NULL) {
+		// TODO: fa-l cu select()
+		
 		do {
 			rc = cgym_send(sock, CGYM_QUIT_MSG, strlen(CGYM_QUIT_MSG));
 		} while (rc == 1); // inca nu a terminat

@@ -146,7 +146,9 @@ void cgym_segment_free(cgym_segment_t *s) {
 }
 
 /*
- * asambleaza segmentele s si le scrie in fd
+ * asambleaza segmentele s si le salveaza
+ * intr-un fisier (cu numele din e),
+ * dupa care verifica MD5-ul.
  * lista s se termina cu elementul NULL
  *
  * returneaza:
@@ -160,7 +162,25 @@ int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
  * sunt terminate
  * 
  * returneaza
+ * -1 la eroare
  * 0 daca nu
  * 1 daca da
  */
-int cgym_segment_done(cgym_segment_t **s);
+int cgym_segment_done(cgym_segment_t **s) {
+	int rc = -1; // eroare daca nu avem nimic
+	
+	if (s != NULL) {
+		while (*s != NULL) {
+			if ((*s)->status != CGYM_SEGMENT_DONE)
+				break;
+			s++;
+		}
+		
+		if (*s != NULL)
+			rc = 0; // nu e gata
+		else
+			rc = 1; // e gata
+	}
+	
+	return rc;
+}

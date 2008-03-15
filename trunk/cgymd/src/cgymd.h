@@ -24,6 +24,6 @@ char* get(char* start, char* stop, char* filename);
  * Function that returns the size of a file
  */ 
 
-char* size(char* filename);
+cgym_entry_t* size(char* filename);
 
 #endif /*CGYMD_H_*/

@@ -13,19 +13,16 @@
  * The function returns the size of the file given as argument
  */
 
-
-char* size(char* filename){
+cgym_entry_t* size(char* filename){
 	struct stat buf;
-	printf("In size\n");
-	char* file_size = malloc(2*sizeof(unsigned long)*8+1);
-	printf("%d\n",sizeof(unsigned long));
 	if (stat(filename,&buf)<0){
 		fprintf(stderr,"Stat error\n");
 		return NULL;
 	}
 	if (S_ISREG(buf.st_mode)){
-		sprintf(file_size,"%lu",buf.st_size);
-		return file_size;
+		cgym_entry_t* entry;
+		entry = cgym_entry_init(filename, compute_md5(filename), CGYM_ENTRY_FILE, buf.st_size);
+		return entry;
 	}
 	return NULL;
 }

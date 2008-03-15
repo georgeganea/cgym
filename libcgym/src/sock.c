@@ -77,7 +77,7 @@ int cgym_sock_get_sockfd(cgym_sock_t *sock) {
 /*
  * returneaza valoarea campului state
  */
-int cgym_sock_get_state(cgym_sock_t *sock) {
+enum cgym_sock_state cgym_sock_get_state(cgym_sock_t *sock) {
 	enum cgym_sock_state rc = CGYM_SOCK_NONE;
 	
 	if (sock != NULL) {

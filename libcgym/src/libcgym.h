@@ -48,7 +48,7 @@ typedef struct cgym_sock_t_ cgym_sock_t;
 cgym_sock_t *cgym_sock_create(cgym_server_t *server);
 int cgym_sock_clear(cgym_sock_t *sock);
 int cgym_sock_get_sockfd(cgym_sock_t *sock);
-int cgym_sock_get_state(cgym_sock_t *sock);
+enum cgym_sock_state cgym_sock_get_state(cgym_sock_t *sock);
 cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
 void cgym_sock_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
@@ -65,12 +65,19 @@ cgym_entry_t *cgym_entry_init(char *file, char *md5,
 							int type, unsigned long size);
 cgym_entry_t *cgym_entry_init_raw(char *str);
 void cgym_entry_info(cgym_entry_t *e);
-int cgym_entry_type(cgym_entry_t *e);
+enum cgym_entry_type cgym_entry_type(cgym_entry_t *e);
 unsigned long cgym_entry_size(cgym_entry_t *e);
 char *cgym_entry_md5(cgym_entry_t *e);
 char *cgym_entry_file(cgym_entry_t *e);
 void cgym_entry_free(cgym_entry_t *e);
 char * cgym_entry_tostring(cgym_entry_t *e);
+
+enum cgym_segment_status {
+	CGYM_SEGMENT_NONE,
+	CGYM_SEGMENT_IDLE,
+	CGYM_SEGMENT_STARTED,
+	CGYM_SEGMENT_DONE
+};
 
 typedef struct cgym_segment_t_ cgym_segment_t;
 
@@ -102,7 +109,8 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e);
 int cgym_send_get_req(cgym_sock_t *sock, cgym_segment_t *s);
 int cgym_recv_get_reply(cgym_sock_t *sock, cgym_segment_t *s);
 
-int cgym_segment_assemble(FILE *fd, cgym_segment_t **s);
+int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
+int cgym_segment_done(cgym_segment_t **s);
 
 /*MD5 functions*/
 

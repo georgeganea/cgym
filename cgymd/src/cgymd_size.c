@@ -15,7 +15,10 @@
 
 cgym_entry_t* size(char* path, char* filename){
 	struct stat buf;
-	char* pathname = malloc(strlen(path)+strlen(filename)+1);
+	char* pathname;
+	if ((pathname = malloc(strlen(path)+strlen(filename)+1))==NULL){
+			return NULL;
+	}
 	strcpy(pathname, path);
 	strcat(pathname, filename);
 	if (stat(pathname,&buf)<0){

@@ -88,8 +88,8 @@ int cgym_send_quit(cgym_sock_t *sock);
 
 /* CGYM client -- LIST */
 int cgym_send_list_req(cgym_sock_t *sock, char *dir);
-int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t **e);
-int cgym_print_list(char *dir, cgym_entry_t **e);
+int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e);
+int cgym_print_list( cgym_entry_t **e);
 
 /* CGYM client -- GET */
 int cgym_sock_setblocking(cgym_sock_t *sock, int block);

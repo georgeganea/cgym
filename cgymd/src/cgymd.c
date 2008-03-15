@@ -14,6 +14,7 @@
 #include "libcgym.h"
 #include "cgymd.h"
 #define BACKLOG 10     // how many pending connections queue will hold
+#define BUF_MAX_SIZE 64
 
 void *client_handler(void *p);
 char *homedir;
@@ -112,8 +113,7 @@ void* client_handler(void *p){
 	      pthread_exit(NULL);
 	}
 	do{
-	do{
-		for(i=0;i<20;i++){
+		for(i=0;i<BUF_MAX_SIZE;i++){
 			bu[i]='\0';
 		}
 		if((r=recv(fd,bu,sizeof(bu),0))>0){
@@ -312,7 +312,7 @@ void* client_handler(void *p){
 	*/
 	free(arg1); free(arg2); free(arg3); free(command); free(dir); 
 	free(file); free(start); free(stop); 
-	}while (cmd==3);
+	
 	close(fd);
 	pthread_exit(NULL);
 	

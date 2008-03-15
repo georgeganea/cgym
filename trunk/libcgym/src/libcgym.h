@@ -70,7 +70,7 @@ unsigned long cgym_entry_size(cgym_entry_t *e);
 char *cgym_entry_md5(cgym_entry_t *e);
 char *cgym_entry_file(cgym_entry_t *e);
 void cgym_entry_free(cgym_entry_t *e);
-
+char * cgym_entry_tostring(cgym_entry_t *e);
 
 typedef struct cgym_segment_t_ cgym_segment_t;
 

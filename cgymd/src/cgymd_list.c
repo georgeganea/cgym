@@ -22,8 +22,6 @@ FILE_INFO* list(char* dirname){
 	struct dirent *d;
 	struct stat buf;
 	FILE_INFO *files_head = NULL;
-	
-	printf("Directorul:%s\n",dirname);
 	if ((dp = opendir(dirname))==NULL){
 		perror("opendir");
 		return NULL;
@@ -47,7 +45,7 @@ FILE_INFO* list(char* dirname){
 		 }
 		 if (S_ISDIR(buf.st_mode)){
 			 cgym_entry_t* entry;
-			 entry = cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,buf.st_size);
+			 entry = cgym_entry_init(d->d_name,"-",CGYM_ENTRY_DIRECTORY,0);
 			 files_head = add_entry(entry,files_head);
 		 }
 		 else if (S_ISREG(buf.st_mode)){
@@ -56,6 +54,7 @@ FILE_INFO* list(char* dirname){
 			 files_head = add_entry(entry, files_head);
 		 }
 	 }
+	 closedir(dp);
 	 return files_head;
 }
 

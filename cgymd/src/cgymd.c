@@ -73,7 +73,6 @@ int main(int argc, char**argv){
     	}
     	pthread_join(client_thread, NULL);
     	close(new_fd);  // parent doesn't need this
-    	close(new_fd);  // parent doesn't need this
     }
 	return 0;
 }
@@ -119,18 +118,18 @@ int checkCommand(char * cmd){
 	return -1;
 }
 int minOf2(int a,int b){
-	if(a>b) return b;
-	return a;
+	return a > b ? a:b;
 }
+
 void* client_handler(void *p){
 
 	printf("Handling client request\n");
 	int fd = *(int*)p;
 	char bu[20];
-	char *temp,*s2,*comp,*tmp;
-	char * command,**li,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
+	char *tmp;
+	char * command,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
 	char *buffer,*s=NULL;
-	int r=-1,n=0,size=0,i,t,wrds=0,cmd; 
+	int r=-1,n=0,size=0,i,cmd; 
 	if (send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG), 0) == -1){
 	      perror("send");
 	      exit(1);
@@ -190,7 +189,6 @@ void* client_handler(void *p){
 			}
 		}
 		}
-//		printf("Token %d %s\n",i,tmp);
 		s=s+strlen(tmp)+1;
 		tmp=NULL;
 		i++;
@@ -299,11 +297,7 @@ void* client_handler(void *p){
 		}
 	}
 	}
-	
 	printf("SFARSIT\n");
-
-	
-
 	printf("COMANDA:%s\n",command);
 	printf("DIR:%s\n",dir);
 	printf("File:%s\n",file);

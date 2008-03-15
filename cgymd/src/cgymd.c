@@ -127,10 +127,10 @@ void* client_handler(void *p){
 	printf("Handling client request\n");
 	int fd = *(int*)p;
 	char bu[20];
-	char *temp,*s2,*comp;
+	char *temp,*s2,*comp,*tmp;
 	char * command,**li,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
 	char *buffer,*s=NULL;
-	int r=-1,n=0,size=0,i,t,wrds=0; 
+	int r=-1,n=0,size=0,i,t,wrds=0,cmd; 
 	if (send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG), 0) == -1){
 	      perror("send");
 	      exit(1);
@@ -149,136 +149,60 @@ void* client_handler(void *p){
 			}
 		}
 	} while(r==sizeof(bu));
+	
 	if((s[size-3]!='\r')||(s[size-2]!='\n')){
 		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 			perror("send");
 		    exit(1);
 		}
 	}
-		if((temp=getNextArg(s,&t))){
-			command=malloc(strlen(temp));
-			strncpy(command,temp,strlen(temp));
-			strncpy(temp,"",strlen(temp));
+	
+	s[size-3]=' ';s[size-2]=' ';
+	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
+	printf("INCEPUT\n");
+	i=0;
+	while((tmp=strtok(s," "))!=NULL){
+		switch (i){
+		case 0:{
+			command=malloc(strlen(tmp));
+			strncpy(command,tmp,strlen(tmp));
+			break;
 		}
-		//check command
-		if((r=checkCommand(command))<0){
+		case 1:{
+			arg1=malloc(strlen(tmp));
+			strncpy(arg1,tmp,strlen(tmp));
+			break;
+		}
+		case 2:{
+			arg2=malloc(strlen(tmp));
+			strncpy(arg2,tmp,strlen(tmp));
+			break;
+		}
+		case 3:{
+			arg3=malloc(strlen(tmp));
+			strncpy(arg3,tmp,strlen(tmp));
+			break;
+		}
+		default:{ //too many arguments
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
 				exit(1);
 			}
 		}
-		s2=s+strlen(command)+t;
-		s=s2;
-		if((temp=getNextArg(s,&t))){
-			switch(r){
-			case 0:{ //LIST
-				dir=malloc(strlen(temp));
-				strncpy(dir,temp,strlen(temp));
-				strncpy(temp,"",strlen(temp));
-				if(dir==NULL){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				if(strcmp(homedir,dir)>0){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				break;
-			}
-			case 1:{ //SIZE
-				file=malloc(strlen(temp));
-				strncpy(file,temp,strlen(temp));
-				strncpy(temp,"",strlen(temp));
-				if(file==NULL){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				if(file!=strstr(file,homedir)){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				if(strcmp(homedir,file)>0){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				break;
-			}
-			case 2:{ //GET
-				start=malloc(strlen(temp));
-				strncpy(start,temp,strlen(temp));
-				strncpy(temp,"",strlen(temp));
-				s2=s+strlen(start)+t;
-				s=s2;
-				if((temp=getNextArg(s,&t))){
-					stop=malloc(strlen(temp));
-					strncpy(stop,temp,strlen(temp));
-					strncpy(temp,"",strlen(temp));
-					s2=s+strlen(stop)+t;
-					s=s2;
-					if((temp=getNextArg(s,&t))){
-						file=malloc(strlen(temp));
-						strncpy(file,temp,strlen(temp));
-						strncpy(temp,"",strlen(temp));
-						s2=s+strlen(stop)+t;
-						s=s2;
-					}
-				}
-				if((file==NULL)||(start==NULL)||(stop==NULL)){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				if(file!=strstr(file,homedir)){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-					    exit(1);
-					}
-				}
-				if(strcmp(homedir,file)>0){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-						exit(1);
-					}
-				}
-				break;
-			}
-			case 3:{ //QUIT
-				if((strlen(temp)>0)&&((temp[0]!='\r')||(temp[1]!='\n'))){
-					if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-						perror("send");
-						exit(1);
-					}
-				}
-				break;
-			}
 		}
+//		printf("Token %d %s\n",i,tmp);
+		s=s+strlen(tmp)+1;
+		tmp=NULL;
+		i++;
 	}
-		if((temp=getNextArg(s,&t))&&(strcmp(temp,"\r\n")==0)){
-			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-				perror("send");
-			    exit(1);
-			}
-		}
-	//exemplu de folosire a functiei list
-	
-	
-	//exemplu de folosire a functiei get
-	switch(r){
-	case 0:{
-		break;
-	}
-	case 1:{
+	printf("COMMAND:%s\n",command);
+	cmd=checkCommand(command);
+	printf("CMD=%d\n",cmd);
+	switch(cmd){
+	case 0 :{ //LIST
+		dir=malloc(strlen(arg1));
+		strncpy(dir,arg1,strlen(arg1));
+		
 		FILE_INFO* file_info;
 		file_info = list(dir);
 		if(file_info==NULL){
@@ -287,39 +211,97 @@ void* client_handler(void *p){
 			    exit(1);
 			}
 		}
+		if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
+			perror("send");
+			exit(1);
+		}
 		printf("IN LIST!\n");
 		while (file_info->next) { 
-			printf("%s\n",cgym_entry_file(file_info->entry_file));
-			file_info = file_info->next; 
-		}
-		break;
-	}
-	case 2:{
-		char* file_contents = get(start,stop,file);
-			if (file_contents == NULL){
-			//	printf("Eroare\n");
-				if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+			char *buffer=cgym_entry_tostring(file_info->entry_file);
+			printf("%s\n",buffer);
+			unsigned long dim=strlen(buffer);
+			int j;
+			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
+				if (send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
 					perror("send");		
 					exit(1);
 				}
 			}
-			else{
-				unsigned long dim=strlen(file_contents);
-				int j;
-				for(j=0;j<(int)(dim/MAX_SIZE);j++){
-					if (send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE), 0) == -1){
-						perror("send");		
-						exit(1);
-					}
-				}
-			}
+			file_info = file_info->next; 
+		}
+		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
+			perror("send");
+			exit(1);
+		}
 		break;
 	}
-	case 3:{
+	case 1 :{ //SIZE
+		file=malloc(strlen(arg1));
+		strncpy(file,arg1,strlen(arg1));
+		char* buffer;
+		if(buffer==NULL){
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+				perror("send");
+			    exit(1);
+			}
+		}
+		if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
+			perror("send");
+			exit(1);
+		}
+		
 		break;
+	}
+	case 2 :{ //GET
+		start=malloc(strlen(arg1));
+		strncpy(start,arg1,strlen(arg1));
+		stop=malloc(strlen(arg2));
+		strncpy(stop,arg2,strlen(arg2));
+		file=malloc(strlen(arg3));
+		strncpy(file,arg3,strlen(arg3));
+		
+		char* file_contents = get(start,stop,file);
+		if (file_contents == NULL){
+			//	printf("Eroare\n");
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+				perror("send");		
+				exit(1);
+			}
+		}
+		else{
+			if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
+		      perror("send");
+		      exit(1);
+			}
+			unsigned long dim=strlen(file_contents);
+			int j;
+			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
+				if (send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE), 0) == -1){
+					perror("send");		
+					exit(1);
+				}
+			}
+		//	printf("END MESSAGE\n");
+			if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
+				perror("send");
+				exit(1);
+			}
+		}
+		break;
+	}
+	case 3 :{ //QUIT
+		break;
+	}
+	default:{ //Command not found
+		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+			perror("send");
+			exit(1);
+		}
 	}
 	}
 	
+	printf("SFARSIT\n");
+
 	
 
 	printf("COMANDA:%s\n",command);
@@ -332,5 +314,3 @@ void* client_handler(void *p){
 	pthread_exit(NULL);
 	
 }
-
-

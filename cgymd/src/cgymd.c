@@ -106,11 +106,12 @@ void* client_handler(void *p){
 	char *tmp;
 	char * command,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
 	char *buffer,*s=NULL;
-	int r=-1,n=0,siz=0,i,cmd; 
+	int r=-1,n=0,siz=0,i,cmd=-1; 
 	if (send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG), 0) == -1){
 	      perror("send");
 	      pthread_exit(NULL);
 	}
+	do{
 	do{
 		for(i=0;i<20;i++){
 			bu[i]='\0';
@@ -128,7 +129,7 @@ void* client_handler(void *p){
 			}
 		}
 	} while(r==sizeof(bu));
-	
+	//free(buffer);
 	printf("COM:%s size=%d\n",s,strlen(s));
 	if((s[strlen(s)-2]!='\r')||(s[strlen(s)-1]!='\n')){
 		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
@@ -181,14 +182,9 @@ void* client_handler(void *p){
 		dir=malloc(strlen(arg1)+1);
 		strcpy(dir,arg1);
 		printf("DIR%s\n",dir);
-		if(strstr(dir,homedir)==NULL){ //directorul cerul nu apatine directorului dat la share
-			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-				perror("send");
-			}
-			pthread_exit(NULL);
-		}
+
 		FILE_INFO* file_info;
-		file_info = list(dir);
+		file_info = list(homedir,dir);
 		if(file_info==NULL){
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
@@ -224,14 +220,10 @@ void* client_handler(void *p){
 	case 1 :{ //SIZE
 		file=malloc(strlen(arg1)+1);
 		strcpy(file,arg1);
-		if(strstr(file,homedir)==NULL){ //fisierul cerul nu apatine directorului dat la share
-			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-				perror("send");
-			}
-			pthread_exit(NULL);
-		}
+		
 		printf("SIZE\n");
-		cgym_entry_t * entry_info = size(file);
+		printf("Homedir:%s\nFile:%s\n",homedir,file);
+		cgym_entry_t * entry_info = size(homedir,file);
 		char *buffer;//=cgym_entry_tostring(entry_info);
 		if(entry_info==NULL){
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
@@ -268,14 +260,8 @@ void* client_handler(void *p){
 		strcpy(stop,arg2);
 		file=malloc(strlen(arg3)+1);
 		strcpy(file,arg3);
-		if(strstr(file,homedir)==NULL){ //fisierul cerul nu apatine directorului dat la share
-			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-				perror("send");
-			}
-			pthread_exit(NULL);
-		}
 		
-		char* file_contents = get(start,stop,file);
+		char* file_contents = get(start,stop,homedir,file);
 		if (file_contents == NULL){
 			//	printf("Eroare\n");
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
@@ -326,6 +312,7 @@ void* client_handler(void *p){
 	*/
 	free(arg1); free(arg2); free(arg3); free(command); free(dir); 
 	free(file); free(start); free(stop); 
+	}while (cmd==3);
 	close(fd);
 	pthread_exit(NULL);
 	

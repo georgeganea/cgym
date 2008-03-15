@@ -50,6 +50,8 @@ void clear(char entr[]){
  *	1 la incomplet
  *	2 la eroare 
  */
+
+const int ADD = 16;
 int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	//int size =128;
 	char *p;
@@ -62,9 +64,11 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	char *size = malloc(21);
 	char *md5=malloc(33);
 	char *fil= malloc(512);
-	cgym_entry_t ** point=malloc(sizeof(cgym_entry_t*));
-	cgym_entry_t ** head = point;
-	
+	int lim = -1;
+	int siz=0;
+	cgym_entry_t ** point=NULL;//=malloc(sizeof(cgym_entry_t*));
+	cgym_entry_t ** head=NULL;// point;
+	cgym_entry_t ** head1 = head;
 	cgym_entry_t *entry = **e;
 	//p=malloc(size+2);
 	p = malloc(1);
@@ -95,15 +99,22 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 							size != NULL &&
 							md5  != NULL &&
 							fil  != NULL   ){
-							//printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
+							printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
 									
 									s = strtol(size,NULL,10);
-									*point=cgym_entry_init(fil,md5,(type[0]=='d'),s);
 									
-									length++;
-									head=realloc(head,length*sizeof(cgym_entry_t*));
-									point++;
 									
+									//length++;
+									if (siz>=lim){
+										if((point=realloc(head,(((lim+=ADD)+1)*sizeof(cgym_entry_t*))))){
+											head=point;
+										}
+										else{
+											perror("realloc");
+										}
+									}
+									head[siz++]=cgym_entry_init(fil,md5,(type[0]=='d'),s);
+								
 						}			
 					}
 					
@@ -114,7 +125,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 		p=malloc(1);
 		
 	}
-	point=NULL;
+	head[siz++]=NULL;
 		*e=head;
 	return 0;
 }
@@ -129,7 +140,7 @@ int cgym_print_list(cgym_entry_t **e){
 	int i=0;
 	while(e!=NULL){
 	i++;
-	printf(">%s\n",(*e)->file);
+	printf("!%s\n",(*e)->file);
 	e++;
 	}
 	return i;

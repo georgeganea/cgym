@@ -158,27 +158,29 @@ char * cgym_entry_tostring(cgym_entry_t *e){
 	if (e != NULL) {
 			switch (e->type) {
 				case CGYM_ENTRY_DIRECTORY:{
-					tmp=malloc(sizeof(char)+1);
+					tmp=malloc(strlen("d")+1);
 					strcpy(tmp,"d");
-					tmp2=malloc(sizeof(char)+1);
+					tmp2=malloc(strlen("-")+1);
 					strcpy(tmp2,"-"); break;
 				}
 				case CGYM_ENTRY_FILE:{
-					tmp=malloc(sizeof(char)+1);
+					tmp=malloc(strlen("-")+1);
 					strcpy(tmp,"-");
 					tmp2=malloc(16*sizeof(unsigned long)+1);
 					sprintf(tmp2,"%lu",e->size);break;
 				}
 				case CGYM_ENTRY_NONE:{
-					tmp=malloc(4*sizeof(char)+1);
+					tmp=malloc(strlen("NONE")+1);
 					strcpy(tmp,"NONE"); break;
 				}
 				default:{
-					tmp=malloc(sizeof("Unknown type")+1);
+					tmp=malloc(strlen("NONE")+1);
 					strcpy(tmp,"NONE");
 				}
 			}
-			buf=malloc(512*sizeof(char));
+			char *md5 = e->md5;
+			char *file = e->file;
+			buf=malloc(strlen(tmp)+strlen(tmp2)+strlen(md5)+strlen(file)+6);
 			sprintf(buf,"%s %s %s %s\\r\\n",
 							tmp,tmp2,e->md5,e->file);
 		}

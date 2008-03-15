@@ -106,7 +106,7 @@ void* client_handler(void *p){
 	char *tmp;
 	char * command,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
 	char *buffer,*s=NULL;
-	int r=-1,n=0,size=0,i,cmd; 
+	int r=-1,n=0,siz=0,i,cmd; 
 	if (send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG), 0) == -1){
 	      perror("send");
 	      pthread_exit(NULL);
@@ -120,7 +120,7 @@ void* client_handler(void *p){
 			if((buffer=realloc(s,n))){
 				s=buffer;
 				strcat(s,bu);
-				size+=r;
+				siz+=r;
 			}
 			else{
 				perror("Error @ realloc!\n");
@@ -129,15 +129,14 @@ void* client_handler(void *p){
 		}
 	} while(r==sizeof(bu));
 	
-	printf("COM:%s\n",s);
-	if((s[size-2]!='\r')||(s[size-1]!='\n')){
+	printf("COM:%s size=%d\n",s,strlen(s));
+	if((s[strlen(s)-2]!='\r')||(s[strlen(s)-1]!='\n')){
 		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		}
 	}
-	
-	s[size-2]=' ';s[size-1]=' ';	
+	s[strlen(s)-2]=' ';s[strlen(s)-1]=' ';
 	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	printf("INCEPUT\n");
 	i=0;
@@ -219,18 +218,35 @@ void* client_handler(void *p){
 	case 1 :{ //SIZE
 		file=malloc(strlen(arg1)+1);
 		strcpy(file,arg1);
-		char* buffer;
-		if(buffer==NULL){
+		printf("SIZE\n");
+		cgym_entry_t * entry_info = size("/home/carmen/Desktop/ioana.txt");
+		char *buffer;//=cgym_entry_tostring(entry_info);
+		if(entry_info==NULL){
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");
 				pthread_exit(NULL);
 			}
 		}
+		buffer=cgym_entry_tostring(entry_info);
+		printf("BUFFER: %s\n",buffer);	
 		if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
+		} 
+		printf("OK SENT\n");
+		unsigned long dim=strlen(buffer);
+		int j;
+		for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
+			if (send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
+				perror("send");			
+				pthread_exit(NULL);
+			}
 		}
-		
+		printf("Sent\n");
+		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
+			perror("send");
+			pthread_exit(NULL);
+		}
 		break;
 	}
 	case 2 :{ //GET

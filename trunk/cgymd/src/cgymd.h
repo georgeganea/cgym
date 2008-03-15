@@ -12,18 +12,18 @@ struct file_info {
 	FILE_INFO *next;
 };
 
-FILE_INFO* list(char* dirname);
+FILE_INFO* list(char* path, char* dirname);
 
 /*
  * Fuction for reading the contents of a file
  */
 
-char* get(char* start, char* stop, char* filename);
+char* get(char* start, char* stop, char* path, char* filename);
 
 /*
  * Function that returns the size of a file
  */ 
 
-cgym_entry_t* size(char* filename);
+cgym_entry_t* size(char* path, char* filename);
 
 #endif /*CGYMD_H_*/

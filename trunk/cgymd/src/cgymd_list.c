@@ -17,7 +17,7 @@
 
 FILE_INFO* add_entry(cgym_entry_t* entry, FILE_INFO* head);
 
-FILE_INFO* list(char* dirpath){
+FILE_INFO* list(char* path, char* dirpath){
 	DIR *dp = NULL;
 	struct dirent *d;
 	struct stat buf;
@@ -34,15 +34,18 @@ FILE_INFO* list(char* dirpath){
 		dirname = malloc(strlen(dirpath)+1);
 		strcpy(dirname,dirpath);		
 	}
-	printf("%s",dirname);
-	if ((dp = opendir(dirname))==NULL){
+
+	char* complete_path = malloc(strlen(path)+strlen(dirname)+1);
+	strcpy(complete_path, path);
+	strcat(complete_path, dirname);
+	if ((dp = opendir(complete_path))==NULL){
 		perror("opendir");
 		return NULL;
 	}
-	 if (chdir(dirname) !=0){
+	if (chdir(complete_path) !=0){
 	    perror("chdir");
 	    return NULL;
-	 }
+	}
 	 cgym_entry_t* first_entry;
 	 first_entry = cgym_entry_init(dirname,NULL,CGYM_ENTRY_NONE,0);
 	 files_head = add_entry(first_entry, files_head);

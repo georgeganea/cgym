@@ -157,17 +157,19 @@ int cgym_sock_setblocking(cgym_sock_t *sock, int block) {
 	int flags, rc = 0;
 	
 	if (sock != NULL) {
-		if ((rc = fcntl(sock->sockfd, F_GETFL, 0)) != -1) {
+		if ((flags = fcntl(sock->sockfd, F_GETFL, 0)) != -1) {
 			if (block) {
 				/* Set socket to blocking */
 				if (fcntl(sock->sockfd, F_SETFL, flags & (~O_NONBLOCK)) < 0) {
-					return -1;
+					rc = 4;
 				} 
 			} else {
 				/* Set socket to non-blocking */
 				if (fcntl(sock->sockfd, F_SETFL, flags | O_NONBLOCK) < 0)
 				{
-					return -1;
+					printf("DA\n");
+					perror("fcntl");
+					rc = 3;
 				}
 			}
 		} else {

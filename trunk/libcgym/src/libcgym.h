@@ -81,6 +81,7 @@ int cgym_segment_set_sock(cgym_segment_t *s, cgym_sock_t *sock);
 cgym_entry_t *cgym_segment_entry(cgym_segment_t *s);
 unsigned long cgym_segment_start(cgym_segment_t *s);
 unsigned long cgym_segment_stop(cgym_segment_t *s);
+char *cgym_segment_buf(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
 
 /* CGYM client */

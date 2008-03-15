@@ -16,6 +16,8 @@ cgym_segment_t *cgym_segment_init(cgym_sock_t *s, cgym_entry_t *e,
 		rc->entry = e;
 		rc->start = start;
 		rc->stop = stop;
+		
+		rc->buf = NULL;
 	}
 	
 	return rc;
@@ -88,6 +90,18 @@ unsigned long cgym_segment_stop(cgym_segment_t *s) {
 	return rc;
 }
 
+/*
+ * returneaza valoarea campului stop al segmentului
+ */
+char *cgym_segment_buf(cgym_segment_t *s) {
+	char *rc = NULL;
+	
+	if (s != NULL)
+		rc = s->buf;
+	
+	return rc;
+}
+	
 /*
  * elibereaza resursele segmentului
  * 

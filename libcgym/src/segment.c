@@ -163,6 +163,4 @@ int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
  * 0 daca nu
  * 1 daca da
  */
-int cgym_segment_done(cgym_segment_t **s) {
-	
-}
+int cgym_segment_done(cgym_segment_t **s);

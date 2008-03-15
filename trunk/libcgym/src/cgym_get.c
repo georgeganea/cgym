@@ -14,14 +14,21 @@ int cgym_send_size_req(cgym_sock_t *sock, char *file) {
 	int rc = 0;
 	char *buf;
 	
+	puts(__func__);
+	cgym_sock_info(sock);
+	printf("\nfile = '%s'\n", file);
+	
 	if (sock != NULL) {
 		if ((buf = malloc(strlen(CGYM_SIZE_MSG) + strlen(file) + 1)) != NULL) {
 			sprintf(buf, CGYM_SIZE_MSG, file);
+			// TODO: fa-l cu select()
 			
 			do {
 				rc = cgym_send(sock, buf, strlen(buf));
 			} while (rc == 1); // inca nu a terminat
 			
+			if (rc == 0)
+				sock->state = CGYM_SOCK_RECV_SIZE_REPLY;
 			free(buf);
 		} else {
 			rc = 3;
@@ -49,10 +56,6 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 	
 	if (sock != NULL) {
 		if (e != NULL) {
-			if (sock->state == CGYM_SOCK_CONNECTED) { // cerere noua
-				sock->state = CGYM_SOCK_RECV_SIZE_REPLY;
-			}
-			
 			if (sock->state == CGYM_SOCK_RECV_SIZE_REPLY) {
 				rc = cgym_recv(sock, strlen(CGYM_OK_MSG));
 				
@@ -137,23 +140,26 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
  * 	0 la succes
  * 	>1 la eroare
  */
-int cgym_send_get_req(cgym_sock_t *sock, cgym_segment_t *s) {
+int cgym_send_get_req(cgym_segment_t *s) {
 	int rc = 0;
 	char *buf, *filename;
 	
-	if (sock != NULL) {
-		if (s != NULL) {
+	if (s != NULL) {
+		if (s->sock != NULL) {
 			filename = cgym_entry_file( cgym_segment_entry(s) );
 			
 			if (filename != NULL) {
 				if ((buf = malloc(strlen(CGYM_GET_MSG)
 								+ strlen(filename) + 1)) != NULL) {
 					sprintf(buf, CGYM_GET_MSG, filename);
+					// TODO: fa-l cu select()
 
 					do {
-						rc = cgym_send(sock, buf, strlen(buf));
+						rc = cgym_send(s->sock, buf, strlen(buf));
 					} while (rc == 1); // inca nu a terminat
 					
+					if (rc == 0) // am putut trimite -- schimbam starea
+						s->sock->state = CGYM_SOCK_RECV_DATA_REPLY;
 					free(buf);
 				} else {
 					rc = 5;
@@ -180,8 +186,8 @@ int cgym_send_get_req(cgym_sock_t *sock, cgym_segment_t *s) {
  *	1 la incomplet
  *	2 la eroare
  */
-int cgym_recv_get_reply(cgym_sock_t *sock, cgym_segment_t *s) {
-	int rc = cgym_recv(sock, 30);
+int cgym_recv_get_reply(cgym_segment_t *s) {
+	int rc = cgym_recv(s->sock, 30);
 	
-	return 0;
+	return rc;
 }

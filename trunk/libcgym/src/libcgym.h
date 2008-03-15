@@ -39,7 +39,8 @@ enum cgym_sock_state {
 	CGYM_SOCK_RECV_LIST,
 	CGYM_SOCK_RECV_SIZE_REPLY,
 	CGYM_SOCK_RECV_SIZE_DATA,
-	CGYM_SOCK_RECV_DATA,
+	CGYM_SOCK_RECV_DATA_REPLY,
+	CGYM_SOCK_RECV_DATA_DATA,
 	
 	CGYM_SOCK_ERR
 };
@@ -106,8 +107,8 @@ int cgym_sock_connect(cgym_sock_t *sock);
 int cgym_send_size_req(cgym_sock_t *sock, char *file);
 int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e);
 
-int cgym_send_get_req(cgym_sock_t *sock, cgym_segment_t *s);
-int cgym_recv_get_reply(cgym_sock_t *sock, cgym_segment_t *s);
+int cgym_send_get_req(cgym_segment_t *s);
+int cgym_recv_get_reply(cgym_segment_t *s);
 
 int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
 int cgym_segment_done(cgym_segment_t **s);

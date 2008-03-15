@@ -10,8 +10,10 @@ char* compute_md5(char* filename){
 	int len;
 	unsigned char buffer[1024], digest[16];
 	char* sir;
-	if ((file = fopen (filename, "rb")) == NULL)
+	if ((file = fopen (filename, "rb")) == NULL){
 		perror("fopen");
+		return NULL;
+	}
 	else {
 		MD5_Init (&context);
 		while ((len = fread (buffer, 1, 1024, file)))
@@ -30,7 +32,6 @@ char* compute_md5(char* filename){
 		sprintf(sir + i * 2, "%02x", digest[i]);
 	}
 	return sir;
-	printf("%s",sir);
 }
 
 void MD5Print (unsigned char digest[16]){

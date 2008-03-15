@@ -141,7 +141,6 @@ void cgym_sock_free(cgym_sock_t *sock) {
 			close(sock->sockfd);
 		}
 		
-		cgym_server_info_free(sock->server);
 		cgym_sock_clear(sock);
 		free(sock);
 	}

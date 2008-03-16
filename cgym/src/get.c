@@ -386,24 +386,14 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	
  	if (cgym_segment_done(segm) == -1) {
  		printf("Eroare: Unexpected segment status.\n");
+ 		return 1;
  	}
- 	
- 	/*
- 	if ((i = cgym_send_get_req(sock,
- 					cgym_segment_init(sock, e, 0, 1) )) != 0) {
- 		cgym_sock_info(sock);
- 		printf("Error[%d]: Could not request file content.\n", i);
- 		return 3;
- 	}
- 	
- 	if ((i = cgym_recv_get_reply(sock, NULL)) != 0) {
- 		cgym_sock_info(sock);
- 		printf("Error[%d]: Could not get file content.\n", i);
- 		return 4;
- 	}
- 	*/
- 	
+ 	 	
  	// cgym_segment_assemble(fp, segm);
+ 	if (cgym_segment_assemble(e, segm)) {
+ 		printf("Eroare: MD5-ul nu este identic.");
+ 		return 1;
+ 	}
  	
  	for (i = 0; i < nr_segm; i++) {
  		printf("sock_info: ");

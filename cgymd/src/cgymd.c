@@ -114,36 +114,6 @@ void* client_handler(void *p){
 	      perror("send");
 	      pthread_exit(NULL);
 	}
-	/*
-	do{
-		for(i=0;i<BUF_MAX_SIZE;i++){
-			bu[i]='\0';
-		}
-		if((r=recv(fd,bu,sizeof(bu),0))>0){
-			n+=r;
-			if((buffer=realloc(s,n))){
-				s=buffer;
-				strcat(s,bu);
-				siz+=r;
-			}
-			else{
-				perror("Error @ realloc!\n");
-				break;
-			}
-		}
-	} while(r==sizeof(bu));
-	//free(buffer);
-	printf("COM:%s size=%d\n",s,strlen(s));
-	if((s[strlen(s)-2]!='\r')||(s[strlen(s)-1]!='\n')){
-		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-			perror("send");
-			pthread_exit(NULL);
-		}
-	}
-	s[strlen(s)-2]=' ';s[strlen(s)-1]=' ';
-	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
-	printf("INCEPUT\n");
-	*/
 	s = readline(fd);
 	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	i=0;
@@ -198,7 +168,8 @@ void* client_handler(void *p){
 			perror("send");
 			pthread_exit(NULL);
 		}
-		while (file_info->next) { 
+		while (file_info->next) {
+			usleep(1000);
 			char *buffer=cgym_entry_tostring(file_info->entry_file);
 			unsigned long dim=strlen(buffer);
 			int j;

@@ -211,18 +211,25 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  			sockfd = cgym_sock_get_sockfd(sock);
  			state = cgym_sock_get_state(sock);
  			
- 			printf("SOCK (Before)[%d]: ", i);
- 			cgym_sock_info(sock);
- 			printf("\n");
- 			
  			if (FD_ISSET(sockfd, &exceptfds)) {
+ 	 			printf("SOCK (Before)[%d]: ", i);
+ 	 			cgym_sock_info(sock);
+ 	 			printf("\n");
+ 	 			
  				printf("%d: OOB data? ", i);
  				cgym_sock_info(sock);
  				printf("\n");
  				rc--;
+ 	 			printf("SOCK (After)[%d]: ", i);
+ 	 			cgym_sock_info(sock);
+ 	 			printf("\n\n");
  			}
 
  			if (FD_ISSET(sockfd, &readfds)) {
+ 	 			printf("SOCK (Before)[%d]: ", i);
+ 	 			cgym_sock_info(sock);
+ 	 			printf("\n");
+ 	 			
  				printf("%d: putem citi ", i);
  				cgym_sock_info(sock);
  				printf("\n");
@@ -289,7 +296,6 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 					
 	 					if (ret == 0) { // gata
 	 						printf("GATA?!\n");
-	 						exit(1);
 	 					} else if (ret > 1) {
 	 						cgym_sock_info(sock);
 	 				 		printf("Error[%d]: Could not receive GET reply ", ret);
@@ -318,9 +324,16 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				}
 
  				rc--;
+ 	 			printf("SOCK (After)[%d]: ", i);
+ 	 			cgym_sock_info(sock);
+ 	 			printf("\n\n");
  			}
 
  			if (FD_ISSET(sockfd, &writefds)) {
+ 	 			printf("SOCK (Before)[%d]: ", i);
+ 	 			cgym_sock_info(sock);
+ 	 			printf("\n");
+ 	 			
  				printf("%d: putem scrie ", i);
  				cgym_sock_info(sock);
  				printf("\n");
@@ -361,12 +374,11 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				}
  				
  				rc--;
+ 	 			printf("SOCK (After)[%d]: ", i);
+ 	 			cgym_sock_info(sock);
+ 	 			printf("\n\n");
  			}
  			
- 			printf("SOCK (After)[%d]: ", i);
- 			cgym_sock_info(sock);
- 			printf("\n\n");
-
  			if (rc == 0) // am procesat toate evenimentele
  				break;
  		}

@@ -69,7 +69,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	sock->buf=p;
 	
 	while (recv(sock->sockfd,p,1,0)==1){
-		printf("%c",*p);
+		//printf("%c",*p);
 		c = *p;
 		entr[i]=c;
 		//printf("|%10s|",entr);
@@ -138,9 +138,19 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 int cgym_print_list(cgym_entry_t **e){
 	
 	int i=0;
+	int k=0;
 	while(e!=NULL){
 	i++;
-	printf("!%s\n",(*e)->file);
+	
+	printf(">%s",(*e)->file);
+		if ((*e)->type != 0){
+		printf("/\n");
+		}
+		else{
+			for (k=(30-strlen((*e)->file));k>0;k--)
+				printf("-");
+			printf("file size:%ld\n",(*e)->size);
+		}
 	e++;
 	}
 	return i;

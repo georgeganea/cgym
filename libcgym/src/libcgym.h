@@ -92,6 +92,7 @@ unsigned long cgym_segment_stop(cgym_segment_t *s);
 char *cgym_segment_buf(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
 
+char *cgym_get_file_name(char *file);
 
 /* CGYM client */
 int cgym_send_quit(cgym_sock_t *sock);

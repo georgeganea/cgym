@@ -10,7 +10,7 @@ int cgym_list(cgym_server_t *server, char *path);
 /*
  * Gets the specified file from the specified servers, using n segments.
  */
-int cgym_get(char *remote, char *local, int segments, cgym_server_t **servers);
+int cgym_get(char *remote, int segments, cgym_server_t **servers);
 
 /*
  * Extract the file name from the full path (path using '/' slashes)

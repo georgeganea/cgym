@@ -4,7 +4,7 @@
 #include <sys/select.h>
 #include "libcgym.h"
 
-int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
+int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
 	cgym_sock_t *sock;
 	cgym_server_t **serv;
 	cgym_segment_t **segm;
@@ -15,11 +15,11 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	int i, ret, rc, sockfd, max_sockfd;
 	unsigned long segm_size, segm_start, segm_stop;
 	
-	enum cgym_sock_state state; 
+	enum cgym_sock_state state;
 	
 	// afisam niste informatii
-	printf("getting '%s' in %d segments, saving to '%s'\n",
-		remote, nr_segm, local);
+	printf("getting '%s' in %d segments\n",
+		remote, nr_segm);
 	
 	printf("servers:\n");
 	serv = servers;
@@ -64,10 +64,12 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  		return 5;
  	}
  	
+#ifdef DEBUG
  	printf("\n"
  			"Avem informatiile. Cerem fisierul...\n");
  	
  	printf("Alocam memorie pentru segmente...\n");
+#endif
  	
  	if ((segm = malloc(sizeof(*segm) * (nr_segm + 1))) == NULL) {
  		perror("malloc");
@@ -76,9 +78,11 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	
  	serv = servers+1;
  	segm_size = cgym_entry_size(e) / nr_segm;
- 	
+
+#ifdef DEBUG
  	printf("len=%ld, nr_segm=%d, segm_size=%ld\n",
 				cgym_entry_size(e), nr_segm, segm_size);
+#endif
  	 	
 	for (i = 0; i < nr_segm; i++) {
  		if (i == 0) {
@@ -97,7 +101,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 	 		printf("Error: could not create socket.\n");
 	 	 		return 1;
 	 	 	}
-	 	 	
+	 
+	 	 	// TODO: try another server
 	 	 	if ((rc = cgym_sock_setblocking(sock, 0)) != 0) {
 	 	 		printf("Error[%d]: Could set socket to nonblocking mode\n", rc);
 	 	 		cgym_sock_info(sock);
@@ -122,7 +127,9 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	 		segm_stop = cgym_entry_size(e);
  	 	}
  	 	
+#ifdef DEBUG
  	 	printf("segmentul %d va cere (%ld, %ld)\n", i, segm_start, segm_stop);
+#endif
 
  	 	segm[i] = cgym_segment_init(sock, e, segm_start, segm_stop);
  	 	
@@ -142,15 +149,19 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  		FD_ZERO(&writefds);
  		FD_ZERO(&exceptfds);
  		
+#ifdef DEBUG
  		printf("==== INIT ====\n");
+#endif
  		
  		max_sockfd = 0;
  		for (i = 0; i < nr_segm; i++) {
  			sock = cgym_segment_sock(segm[i]);
  			sockfd = cgym_sock_get_sockfd(sock);
  			state = cgym_sock_get_state(sock);
- 			
+ 		
+#ifdef DEBUG
  			cgym_sock_info(sock); printf("\n");
+#endif
  			
  			if (max_sockfd < sockfd) max_sockfd = sockfd;
  			
@@ -176,6 +187,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				// eroare? trebuie repornit segmentul
  				case CGYM_SOCK_ERR:
  					printf("ERROR!\n");
+ 					// TODO: fix!
  					exit(1);
  					break;
  				
@@ -203,29 +215,37 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	    	exit(1);
 	    }
 	    
+#ifdef DEBUG
 	    printf("### %d eventuri\n", rc);
+#endif
  
  		for (i = 0; i < nr_segm; i++) {
  			sock = cgym_segment_sock(segm[i]);
- 			
  			sockfd = cgym_sock_get_sockfd(sock);
  			state = cgym_sock_get_state(sock);
  			
  			if (FD_ISSET(sockfd, &exceptfds)) {
+#ifdef DEBUG
  	 			printf("SOCK (Before)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n");
+#endif
  	 			
- 				printf("%d: OOB data? ", i);
+ 				printf("%d: OOB data?! ", i);
  				cgym_sock_info(sock);
  				printf("\n");
  				rc--;
+ 				exit(1);
+ 				
+#ifdef DEBUG
  	 			printf("SOCK (After)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n\n");
+#endif
  			}
 
  			if (FD_ISSET(sockfd, &readfds)) {
+#ifdef DEBUG
  	 			printf("SOCK (Before)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n");
@@ -233,6 +253,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				printf("%d: putem citi ", i);
  				cgym_sock_info(sock);
  				printf("\n");
+#endif
  				
  				switch (state) {
 	 				case CGYM_SOCK_RECV_HANDSHAKE:
@@ -247,6 +268,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 				 		if ((ret = cgym_send_size_req(sock,
 	 				 							cgym_entry_file(e))) != 0) {
 		 				 		cgym_sock_info(sock);
+		 				 		//TODO: try another server
 		 				 		printf("Error[%d]: Could not send SIZE request ", ret);
 		 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
 		 				 		printf("\n");
@@ -255,6 +277,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 				 	} else if (ret > 1) { // eroare
 	 				 		cgym_sock_info(sock);
 	 				 		printf("Error[%d]: Could not connect to ", ret);
+	 				 		// TODO: try another server
 	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
 	 				 		printf("\n");
 	 				 		return 2;
@@ -286,6 +309,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 						cgym_sock_info(sock);
 	 				 		printf("Error[%d]: Could not receive SIZE reply ", ret);
 	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
+	 				 		// TODO: try another server
 	 				 		printf("\n");
 	 				 		return 2;
 	 				 	}
@@ -295,10 +319,13 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 					ret = cgym_recv_get_reply(segm[i]);
 	 					
 	 					if (ret == 0) { // gata
-	 						printf("GATA?!\n");
+	 						printf("[%d] Segment %ld-%ld complete.\n", i,
+	 								cgym_segment_start(segm[i]),
+	 								cgym_segment_stop(segm[i]));
 	 					} else if (ret > 1) {
 	 						cgym_sock_info(sock);
 	 				 		printf("Error[%d]: Could not receive GET reply ", ret);
+	 				 		// TODO: try another server
 	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
 	 				 		printf("\n");
 	 				 		return 2;
@@ -324,12 +351,15 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				}
 
  				rc--;
+#ifdef DEBUG
  	 			printf("SOCK (After)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n\n");
+#endif
  			}
 
  			if (FD_ISSET(sockfd, &writefds)) {
+#ifdef DEBUG
  	 			printf("SOCK (Before)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n");
@@ -337,6 +367,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				printf("%d: putem scrie ", i);
  				cgym_sock_info(sock);
  				printf("\n");
+#endif
  				
  				switch (state) {
  					case CGYM_SOCK_CONNECTING:
@@ -351,6 +382,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 				 		if ((ret = cgym_send_size_req(sock,
 	 				 							cgym_entry_file(e))) != 0) {
 		 				 		cgym_sock_info(sock);
+		 				 		// TODO
 		 				 		printf("Error[%d]: Could not send SIZE request ", ret);
 		 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
 		 				 		printf("\n");
@@ -359,6 +391,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 				 	} else if (ret > 1) { // eroare
 	 				 		cgym_sock_info(sock);
 	 				 		printf("Error[%d]: Could not connect to ", ret);
+	 				 		// TODO
 	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
 	 				 		printf("\n");
 	 				 		return 2;
@@ -374,9 +407,11 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				}
  				
  				rc--;
+#ifdef DEBUG
  	 			printf("SOCK (After)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n\n");
+#endif
  			}
  			
  			if (rc == 0) // am procesat toate evenimentele
@@ -391,14 +426,16 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	 	
  	// cgym_segment_assemble(fp, segm);
  	if (cgym_segment_assemble(e, segm)) {
- 		printf("Eroare: MD5-ul nu este identic.");
+ 		printf("Eroare: Segmentele nu au putut fi asamblate.");
  		return 1;
  	}
  	
  	for (i = 0; i < nr_segm; i++) {
+#ifdef DEBUG
  		printf("sock_info: ");
  		cgym_sock_info( cgym_segment_sock(segm[i]));
  		printf("\n");
+#endif
  		
  		cgym_sock_free( cgym_segment_sock(segm[i]) );
  		cgym_segment_free(segm[i]);

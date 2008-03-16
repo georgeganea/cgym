@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 		cgym_server_info_free(s);
 	} else if (!strcmp(argv[1], "get")) {
 		cgym_server_t **slist;
-		char *tail, *local;
+		char *tail;
 		int i, start = 2, segments = 1;
 		
 		if (argc < 4) {
@@ -66,11 +66,7 @@ int main(int argc, char **argv) {
 			slist[i - start] = cgym_server_info_create(argv[i]);
 		slist[argc - start] = NULL;
 		
-		local = cgym_get_file_name(path);
-		
-		cgym_get(path, local, segments, slist);
-		
-		free(local);
+		cgym_get(path, segments, slist);
 		
 		for (i = start; i < argc; i++) {
 			cgym_server_info_free(slist[i-start]);

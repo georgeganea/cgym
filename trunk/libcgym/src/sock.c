@@ -115,8 +115,8 @@ void cgym_sock_info(cgym_sock_t *sock) {
 			case CGYM_SOCK_RECV_LIST: ptr = "RECV_LIST"; break;
 			case CGYM_SOCK_RECV_SIZE_REPLY: ptr = "RECV_SIZE_REPLY"; break;
 			case CGYM_SOCK_RECV_SIZE_DATA: ptr = "RECV_SIZE_DATA"; break;
-			case CGYM_SOCK_RECV_DATA_REPLY: ptr = "RECV_DATA_REPLY"; break;
-			case CGYM_SOCK_RECV_DATA_DATA: ptr = "RECV_DATA_DATA"; break;
+			case CGYM_SOCK_RECV_GET_REPLY: ptr = "RECV_GET_REPLY"; break;
+			case CGYM_SOCK_RECV_GET_DATA: ptr = "RECV_GET_DATA"; break;
 			
 			case CGYM_SOCK_ERR: ptr = "ERR"; break;
 			default: ptr = "Unknown state"; break;

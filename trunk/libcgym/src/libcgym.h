@@ -17,7 +17,7 @@
 #define CGYM_ERR_MSG "ERR\r\n"
 
 #define CGYM_SIZE_MSG "SIZE %s\r\n"
-#define CGYM_GET_MSG "GET %s\r\n"
+#define CGYM_GET_MSG "GET %ld %ld %s\r\n"
 #define CGYM_QUIT_MSG "QUIT\r\n"
 #define CGYM_END_MSG "\r\n"
 #define CGYM_OK_MSG "OK\r\n"
@@ -39,8 +39,8 @@ enum cgym_sock_state {
 	CGYM_SOCK_RECV_LIST,
 	CGYM_SOCK_RECV_SIZE_REPLY,
 	CGYM_SOCK_RECV_SIZE_DATA,
-	CGYM_SOCK_RECV_DATA_REPLY,
-	CGYM_SOCK_RECV_DATA_DATA,
+	CGYM_SOCK_RECV_GET_REPLY,
+	CGYM_SOCK_RECV_GET_DATA,
 	
 	CGYM_SOCK_ERR
 };
@@ -91,6 +91,7 @@ unsigned long cgym_segment_start(cgym_segment_t *s);
 unsigned long cgym_segment_stop(cgym_segment_t *s);
 char *cgym_segment_buf(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
+
 
 /* CGYM client */
 int cgym_send_quit(cgym_sock_t *sock);

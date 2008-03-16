@@ -58,6 +58,7 @@
 <option id="gnu.c.link.option.noshared.111846283" name="No shared libraries (-static)" superClass="gnu.c.link.option.noshared"/>
 <option id="gnu.c.link.option.libs.371983707" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="libcgym"/>
+<listOptionValue builtIn="false" value="crypto"/>
 </option>
 <option id="gnu.c.link.option.paths.366186048" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/libcgym/Debug}&quot;"/>
@@ -335,6 +336,7 @@
 </scannerConfigBuildInfo>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 <cconfiguration id="cdt.managedbuild.config.gnu.exe.release.498345979">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.498345979" moduleId="org.eclipse.cdt.core.settings" name="Release">
@@ -630,6 +632,7 @@
 </scannerConfigBuildInfo>
 </storageModule>
 <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">

@@ -120,8 +120,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	 	segm[i] = cgym_segment_init(sock, e, segm_start, segm_stop);
  	 	
  	 	if (i == 0) {
- 	 		if (cgym_send_get_req(segm[i])) {
- 	 			printf("Error: could not send segment.\n");
+ 	 		if (cgym_send_size_req(sock, remote)) {
+ 	 			printf("Error: could not send SIZE request.\n");
  	 			// TODO: create new connection in its place
  	 			exit(1);
  	 		}

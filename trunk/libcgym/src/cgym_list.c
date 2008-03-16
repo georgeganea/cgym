@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include "libcgym_priv.h"
+#include "unistd.h"
 /*
  * 
  * trimite cererea pentru lista catre server
@@ -17,11 +18,6 @@ int cgym_send_list_req(cgym_sock_t *sock, char *dir){
 	int socket = cgym_sock_get_sockfd(sock);
 	int i;
 	char * message = malloc(strlen(dir)+8);//LIST +strlen(dir)+\r\n
-	//strcpy(message,"LIST ");
-	//strcat(message,dir);
-	//printf("mesajul inatinte de o si n :%s\n",message);
-	//message[strlen(message)+1]='\r';// \0 = \r
-	//message[strlen(message)+2]='\n';// se adauga si \n
 	sprintf(message,"%s %s\r\n","LIST",dir);
 	printf("mesajul |%s|",message);
 	i=send(socket,message,strlen(message),0);
@@ -75,17 +71,24 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	sock->buf=p;
 	
 	while (recv(sock->sockfd,p,1,0)==1){
-		//printf("%c",*p);
+		printf("%c",*p);
 		c = *p;
 		entr[i]=c;
+		//printf("|%10s|",entr);
 		i++;
 		if ('\n'==c){
+			usleep(122);
 						if (entr[0]=='\r'){
 							printf("am iesit \n");
 								break;
 						}
 					//	printf("sirul:\n%s",entr);
 					//printf("este n :\n");
+						if ((entr[0]=='E')&&(entr[1]=='R')&&(entr[2]=='R'))
+						{
+							printf("server sent ERR! folder may not exist, bye bye!");
+							exit(1);
+						}
 					    if (entr[0]=='O'){
 						printf("serverul zice ok, acuma trimite lista:\n");}
 					    else{
@@ -99,7 +102,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 							size != NULL &&
 							md5  != NULL &&
 							fil  != NULL   ){
-							printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
+							//printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
 									
 									s = strtol(size,NULL,10);
 									

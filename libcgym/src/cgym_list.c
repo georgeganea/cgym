@@ -102,9 +102,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 							//printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
 									
 									s = strtol(size,NULL,10);
-									
-									
-									//length++;
+										//length++;
 									if (siz>=lim){
 										if((point=realloc(head,(((lim+=ADD)+1)*sizeof(cgym_entry_t*))))){
 											head=point;
@@ -147,9 +145,9 @@ int cgym_print_list(cgym_entry_t **e){
 		printf("/\n");
 		}
 		else{
-			for (k=(30-strlen((*e)->file));k>0;k--)
+			for (k=(40-strlen((*e)->file));k>0;k--)
 				printf("-");
-			printf("file size:%ld\n",(*e)->size);
+			printf("file size:%ld B\n",(*e)->size);
 		}
 	e++;
 	}

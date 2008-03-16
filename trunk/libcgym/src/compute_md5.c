@@ -24,7 +24,6 @@ char* compute_md5(char* filename){
 
 		//printf ("MD5 (%s) = ", filename);
 		//MD5Print (digest);
-		printf ("\n");
 	}
 	int i;
 	sir = malloc(2*sizeof(digest)+1);

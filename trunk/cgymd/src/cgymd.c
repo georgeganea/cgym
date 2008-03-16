@@ -15,8 +15,10 @@
 #include "cgymd.h"
 #define BACKLOG 10     // how many pending connections queue will hold
 #define BUF_MAX_SIZE 64
+#define ADD 16
 
 void *client_handler(void *p);
+char* readline(int fd);
 char *homedir;
 int main(int argc, char**argv){
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -112,6 +114,7 @@ void* client_handler(void *p){
 	      perror("send");
 	      pthread_exit(NULL);
 	}
+	/*
 	do{
 		for(i=0;i<BUF_MAX_SIZE;i++){
 			bu[i]='\0';
@@ -140,6 +143,9 @@ void* client_handler(void *p){
 	s[strlen(s)-2]=' ';s[strlen(s)-1]=' ';
 	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	printf("INCEPUT\n");
+	*/
+	s = readline(fd);
+	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	i=0;
 	while((tmp=strtok(s," "))!=NULL){
 		switch (i){
@@ -174,15 +180,11 @@ void* client_handler(void *p){
 		tmp=NULL;
 		i++;
 	}
-	printf("COMMAND:%s\n",command);
 	cmd=checkCommand(command);
-	printf("CMD=%d\n",cmd);
 	switch(cmd){
 	case 0 :{ //LIST
 		dir=malloc(strlen(arg1)+1);
 		strcpy(dir,arg1);
-		printf("DIR%s\n",dir);
-
 		FILE_INFO* file_info;
 		file_info = list(homedir,dir);
 		if(file_info==NULL){
@@ -196,10 +198,8 @@ void* client_handler(void *p){
 			perror("send");
 			pthread_exit(NULL);
 		}
-		printf("IN LIST!\n");
 		while (file_info->next) { 
 			char *buffer=cgym_entry_tostring(file_info->entry_file);
-			printf("BUFFER=%s\n",buffer);
 			unsigned long dim=strlen(buffer);
 			int j;
 			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
@@ -220,9 +220,6 @@ void* client_handler(void *p){
 	case 1 :{ //SIZE
 		file=malloc(strlen(arg1)+1);
 		strcpy(file,arg1);
-		
-		printf("SIZE\n");
-		printf("Homedir:%s\nFile:%s\n",homedir,file);
 		cgym_entry_t * entry_info = size(homedir,file);
 		char *buffer;//=cgym_entry_tostring(entry_info);
 		if(entry_info==NULL){
@@ -232,12 +229,10 @@ void* client_handler(void *p){
 			pthread_exit(NULL);
 		}
 		buffer=cgym_entry_tostring(entry_info);
-		printf("BUFFER: %s\n",buffer);	
 		if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		} 
-		printf("OK SENT\n");
 		unsigned long dim=strlen(buffer);
 		int j;
 		for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
@@ -246,7 +241,6 @@ void* client_handler(void *p){
 				pthread_exit(NULL);
 			}
 		}
-		printf("Sent\n");
 		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
@@ -263,7 +257,6 @@ void* client_handler(void *p){
 		
 		char* file_contents = get(start,stop,homedir,file);
 		if (file_contents == NULL){
-			//	printf("Eroare\n");
 			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");		
 			}
@@ -282,7 +275,6 @@ void* client_handler(void *p){
 					pthread_exit(NULL);
 				}
 			}
-		//	printf("END MESSAGE\n");
 			if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 				perror("send");
 				pthread_exit(NULL);
@@ -300,20 +292,32 @@ void* client_handler(void *p){
 		}
 	}
 	}
-	printf("Sfarsit\n");
-	/*
-	printf("SFARSIT\n");
-	printf("COMANDA:%s\n",command);
-	printf("DIR:%s\n",dir);
-	printf("File:%s\n",file);
-	printf("START:%s\n",start);
-	printf("STOP:%s\n",stop);
-	printf("END!\n");
-	*/
-	free(arg1); free(arg2); free(arg3); free(command); free(dir); 
-	free(file); free(start); free(stop); 
-	
 	close(fd);
 	pthread_exit(NULL);
 	
 }
+
+char* readline(int fd) {
+	char*p = NULL,*str = NULL;
+	char c, lim = -1, size = 0;
+	int len;
+	while (((len = recv(fd,&c,1,0))>0)) {
+		if (size >= lim){
+			if (!(p = realloc(str, (lim+=ADD)+1))) {
+				break; // nu mai avem loc
+			}
+			else
+				str=p;
+		}
+		if (c=='\r'){
+			str[size++] = ' ';
+			break;
+		}
+		str[size++] = c;
+	}
+	if (str) {
+		str[size++] = '\0'; 
+		realloc(str, size); 
+	}
+	return str;
+} 

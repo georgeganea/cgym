@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
 #include "libcgym.h"
 
@@ -7,7 +8,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	cgym_sock_t *sock;
 	cgym_server_t **serv;
 	cgym_segment_t **segm;
-	cgym_entry_t *e;
+	cgym_entry_t *e, *e1;
 	
     fd_set readfds, writefds, exceptfds;
 	
@@ -57,6 +58,12 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	printf("\n");
  	
  	cgym_sock_info(sock);
+ 	
+ 	if ( cgym_entry_type(e) != CGYM_ENTRY_FILE ) {
+ 		printf("Error: entry is not a file.\n");
+ 		return 5;
+ 	}
+ 	
  	printf("\n"
  			"Avem informatiile. Cerem fisierul...\n");
  	
@@ -120,8 +127,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  	 	segm[i] = cgym_segment_init(sock, e, segm_start, segm_stop);
  	 	
  	 	if (i == 0) {
- 	 		if (cgym_send_size_req(sock, remote)) {
- 	 			printf("Error: could not send SIZE request.\n");
+ 	 		if (cgym_send_get_req(segm[i])) {
+ 	 			printf("Error: could not send GET request.\n");
  	 			// TODO: create new connection in its place
  	 			exit(1);
  	 		}
@@ -135,10 +142,15 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  		FD_ZERO(&writefds);
  		FD_ZERO(&exceptfds);
  		
+ 		printf("==== INIT ====\n");
+ 		
  		max_sockfd = 0;
  		for (i = 0; i < nr_segm; i++) {
- 			sockfd = cgym_sock_get_sockfd( cgym_segment_sock(segm[i]) );
- 			state = cgym_sock_get_state( cgym_segment_sock(segm[i]) );
+ 			sock = cgym_segment_sock(segm[i]);
+ 			sockfd = cgym_sock_get_sockfd(sock);
+ 			state = cgym_sock_get_state(sock);
+ 			
+ 			cgym_sock_info(sock); printf("\n");
  			
  			if (max_sockfd < sockfd) max_sockfd = sockfd;
  			
@@ -156,8 +168,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  				case CGYM_SOCK_RECV_HANDSHAKE:
  				case CGYM_SOCK_RECV_SIZE_REPLY:
  				case CGYM_SOCK_RECV_SIZE_DATA:
- 				case CGYM_SOCK_RECV_DATA_REPLY:
- 				case CGYM_SOCK_RECV_DATA_DATA:
+ 				case CGYM_SOCK_RECV_GET_REPLY:
+ 				case CGYM_SOCK_RECV_GET_DATA:
  					FD_SET(sockfd, &readfds);
  					break;
  			
@@ -178,7 +190,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  					 * care nu ar trebui sa apara la inceputul ciclului
  					 */
  					printf("Unhandled state: ");
- 					cgym_sock_info( cgym_segment_sock(segm[i]) );
+ 					cgym_sock_info(sock);
  					printf("\n");
  					exit(1);
  			}
@@ -191,26 +203,28 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	    	exit(1);
 	    }
 	    
-	    printf("%d eventuri\n", rc);
+	    printf("### %d eventuri\n", rc);
  
  		for (i = 0; i < nr_segm; i++) {
- 			sockfd = cgym_sock_get_sockfd( cgym_segment_sock(segm[i]) );
- 			state = cgym_sock_get_state( cgym_segment_sock(segm[i]) );
+ 			sock = cgym_segment_sock(segm[i]);
+ 			
+ 			sockfd = cgym_sock_get_sockfd(sock);
+ 			state = cgym_sock_get_state(sock);
  			
  			printf("SOCK (Before)[%d]: ", i);
- 			cgym_sock_info(cgym_segment_sock(segm[i]));
+ 			cgym_sock_info(sock);
  			printf("\n");
  			
  			if (FD_ISSET(sockfd, &exceptfds)) {
  				printf("%d: OOB data? ", i);
- 				cgym_sock_info( cgym_segment_sock(segm[i]) );
+ 				cgym_sock_info(sock);
  				printf("\n");
  				rc--;
  			}
 
  			if (FD_ISSET(sockfd, &readfds)) {
  				printf("%d: putem citi ", i);
- 				cgym_sock_info( cgym_segment_sock(segm[i]) );
+ 				cgym_sock_info(sock);
  				printf("\n");
  				
  				switch (state) {
@@ -241,10 +255,49 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 				 	
 	 					break;
 	
-	 				case CGYM_SOCK_RECV_SIZE_REPLY: break;
-	 				case CGYM_SOCK_RECV_SIZE_DATA: break;
-	 				case CGYM_SOCK_RECV_DATA_REPLY: break;
-	 				case CGYM_SOCK_RECV_DATA_DATA: break;
+	 				case CGYM_SOCK_RECV_SIZE_REPLY:
+	 				case CGYM_SOCK_RECV_SIZE_DATA:
+	 					ret = cgym_recv_size_reply(sock, &e1);
+	 					
+	 					if (ret == 0) { // gata
+	 						if (cgym_entry_type(e1) == CGYM_ENTRY_FILE
+	 							&& !strcmp(cgym_entry_file(e), cgym_entry_file(e1))
+	 							&& cgym_entry_size(e) == cgym_entry_size(e1)
+	 							&& !strcmp(cgym_entry_md5(e), cgym_entry_md5(e1))
+	 							) {
+	 							// e acelasi fisier
+	 				 	 		if (cgym_send_get_req(segm[i])) {
+	 				 	 			printf("Error: could not send GET request.\n");
+	 				 	 			// TODO: create new connection in its place
+	 				 	 			exit(1);
+	 				 	 		}
+	 						} else {
+	 							// nu e acelasi fisier -- trebuie sters serverul
+	 							// TODO: sterge serverul
+	 						}
+	 					} else if (ret > 1) { // eroare
+	 						cgym_sock_info(sock);
+	 				 		printf("Error[%d]: Could not receive SIZE reply ", ret);
+	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
+	 				 		printf("\n");
+	 				 		return 2;
+	 				 	}
+	 					break;
+	 				case CGYM_SOCK_RECV_GET_REPLY:
+	 				case CGYM_SOCK_RECV_GET_DATA:
+	 					ret = cgym_recv_get_reply(segm[i]);
+	 					
+	 					if (ret == 0) { // gata
+	 						printf("GATA?!\n");
+	 						exit(1);
+	 					} else if (ret > 1) {
+	 						cgym_sock_info(sock);
+	 				 		printf("Error[%d]: Could not receive GET reply ", ret);
+	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
+	 				 		printf("\n");
+	 				 		return 2;
+	 					}
+	 					break;
 	 				
 	 				default:
 	 					/*
@@ -258,8 +311,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 					 * 
 	 					 * care nu ar trebui sa apara la inceputul ciclului
 	 					 */
-	 					printf("Unhandled state: ");
-	 					cgym_sock_info( cgym_segment_sock(segm[i]) );
+	 					printf("(read) Unhandled state: ");
+	 					cgym_sock_info(sock);
 	 					printf("\n");
 	 					exit(1);
  				}
@@ -269,7 +322,7 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 
  			if (FD_ISSET(sockfd, &writefds)) {
  				printf("%d: putem scrie ", i);
- 				cgym_sock_info( cgym_segment_sock(segm[i]) );
+ 				cgym_sock_info(sock);
  				printf("\n");
  				
  				switch (state) {
@@ -301,8 +354,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
 	 				 	break;
  					
 					default:
-	 					printf("Unhandled state: ");
-	 					cgym_sock_info( cgym_segment_sock(segm[i]) );
+	 					printf("(write) Unhandled state: ");
+	 					cgym_sock_info(sock);
 	 					printf("\n");
 	 					exit(1);
  				}
@@ -311,8 +364,8 @@ int cgym_get(char *remote, char *local, int nr_segm, cgym_server_t **servers) {
  			}
  			
  			printf("SOCK (After)[%d]: ", i);
- 			cgym_sock_info(cgym_segment_sock(segm[i]));
- 			printf("\n");
+ 			cgym_sock_info(sock);
+ 			printf("\n\n");
 
  			if (rc == 0) // am procesat toate evenimentele
  				break;

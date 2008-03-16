@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 	} else if (!strcmp(argv[1], "get")) {
 		cgym_server_t **slist;
 		char *tail, *local;
-		int i, start = 2, segments = CGYM_SEGMENT_DEFAULT;
+		int i, start = 2, segments = 1;
 		
 		if (argc < 4) {
 			fprintf(stderr, "usage: cgym get [-n N] file server1 ... serverN\n");
@@ -51,7 +51,11 @@ int main(int argc, char **argv) {
 				
 				start = 4;
 				segments = i;
-			} // else, the -n is the file name (weird, huh?)
+			} else { // fisierul se numeste -n (ciudat, nu?)
+				segments = argc - 3;
+			}
+		} else { // daca nu, avem atatea segmente cate servere
+			segments = argc - 3;
 		}
 		
 		path = argv[start++];

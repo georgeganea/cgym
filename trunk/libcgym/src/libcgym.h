@@ -111,7 +111,7 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e);
 int cgym_send_get_req(cgym_segment_t *s);
 int cgym_recv_get_reply(cgym_segment_t *s);
 
-int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s);
+int cgym_segment_assemble(cgym_entry_t *e, cgym_segment_t **s);
 int cgym_segment_done(cgym_segment_t **s);
 
 /*MD5 functions*/

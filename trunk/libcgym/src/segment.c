@@ -164,13 +164,14 @@ void cgym_segment_free(cgym_segment_t *s) {
  *	0 la succes
  *	1 la eroare
  */
-int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s){
+int cgym_segment_assemble(cgym_entry_t *e, cgym_segment_t **s){
 	FILE *f = fopen(e->file,"w+");
 	int k=0;
 	while((s[k])!=NULL){
-		/*if ((((s[k])->stop) - ((s[k])->start) - (strlen((s[k])->buf))+1)!=0){
-			printf("pozitiile si lungimea bufferului nu corespund la segmentul care incepe la offset:%ld\n",(*s)->start);
-		}*/
+		if (f == NULL) {
+			printf("eroare la crearea fisierului\n");
+			return 1;
+		}
 		if ((s[k])->status != CGYM_SEGMENT_DONE){
 			printf("segmentul care incepe de la la offset:%ld nu este complet\n",(*s)->start);
 			return 1;
@@ -188,7 +189,7 @@ int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s){
 		k++;
 	}
 	fclose(f);
-	if(strcmp(md5,compute_md5(e->file))!=0){
+	if(strcmp(e->md5,compute_md5(e->file))!=0){
 		printf("md5 check failed\n");
 		return 1;
 	}

@@ -55,7 +55,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	int s;
 	char *entr=malloc(1024);
 	int i=0;
-	int length=1;
+	
 	char *type= malloc(1);
 	char *size = malloc(21);
 	char *md5=malloc(33);
@@ -64,9 +64,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	int siz=0;
 	cgym_entry_t ** point=NULL;//=malloc(sizeof(cgym_entry_t*));
 	cgym_entry_t ** head=NULL;// point;
-	cgym_entry_t ** head1 = head;
-	cgym_entry_t *entry = **e;
-	//p=malloc(size+2);
+	
 	p = malloc(1);
 	sock->buf=p;
 	
@@ -82,8 +80,7 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 							printf("am iesit \n");
 								break;
 						}
-					//	printf("sirul:\n%s",entr);
-					//printf("este n :\n");
+				
 						if ((entr[0]=='E')&&(entr[1]=='R')&&(entr[2]=='R'))
 						{
 							printf("server sent ERR! folder may not exist, bye bye!");

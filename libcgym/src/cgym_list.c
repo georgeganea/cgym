@@ -137,7 +137,7 @@ int cgym_print_list(cgym_entry_t **e){
 	
 	int i=0;
 	int k=0;
-	while(e!=NULL){
+	while((*e)!=NULL){
 	i++;
 	
 	printf(">%s",(*e)->file);

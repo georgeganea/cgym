@@ -2,8 +2,6 @@
 #define CGYM_H_
 #include "libcgym.h"
 
-#define CGYM_SEGMENT_DEFAULT 1
-
 /*
  * Lists the contents of the specified path on the specified server.
  */

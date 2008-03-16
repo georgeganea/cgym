@@ -166,7 +166,6 @@ void cgym_segment_free(cgym_segment_t *s) {
  */
 int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s){
 	FILE *f = fopen(e->file,"w+");
-	int i=0;
 	int k=0;
 	while((s[k])!=NULL){
 		/*if ((((s[k])->stop) - ((s[k])->start) - (strlen((s[k])->buf))+1)!=0){
@@ -177,8 +176,9 @@ int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s){
 			return 1;
 		}
 		if (!fseek(f,(s[k])->start,SEEK_SET)){
-			for (i=((s[k])->start);i<((s[k])->stop);i++){
-				fputc(((s[k])->buf[i-((s[k])->start)]),f);
+			if (fwrite(s[k]->buf, s[k]->stop - s[k]->start, 1, f) != 1) {
+				printf("eroare la scriere!\n");
+				return 1;
 			}
 		}
 		else{

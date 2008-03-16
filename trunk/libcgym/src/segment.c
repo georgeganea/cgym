@@ -165,11 +165,13 @@ void cgym_segment_free(cgym_segment_t *s) {
  *	1 la eroare
  */
 int cgym_segment_assemble(cgym_entry_t *e, cgym_segment_t **s){
-	FILE *f = fopen(e->file,"w+");
+	FILE *f;
+	char *name = cgym_get_file_name(e->file), *md5;
 	int k=0;
-	printf("cream %s\n", e->file);
+
 	while((s[k])!=NULL){
-		if (f == NULL) {
+		printf("cream %s\n", name);
+		if ((f = fopen(name,"w+")) == NULL) {
 			printf("eroare la crearea fisierului\n");
 			return 1;
 		}
@@ -190,11 +192,16 @@ int cgym_segment_assemble(cgym_entry_t *e, cgym_segment_t **s){
 		k++;
 	}
 	fclose(f);
-	if(strcmp(e->md5,compute_md5(e->file))!=0){
+	md5 = compute_md5(name);
+	if(strcmp(e->md5,md5)!=0){
 		printf("md5 check failed\n");
 		return 1;
 	}
-	printf("md5:%s\n",compute_md5(e->file));
+	printf("md5: %s\n",md5);
+	
+	free(name);
+	free(md5);
+	
 	return 0;
 }
 

@@ -64,7 +64,6 @@ FILE_INFO* list(char* path, char* dirpath){
 			 dir = malloc(strlen(dirname)+strlen(d->d_name)+1);
 			 strcpy(dir,dirname);
 			 strcat(dir,d->d_name);
-			 //sprintf(dir,"%s%s",dirname,d->d_name);
 			 cgym_entry_t* entry;
 			 entry = cgym_entry_init(dir,"-",CGYM_ENTRY_DIRECTORY,0);
 			 files_head = add_entry(entry,files_head);

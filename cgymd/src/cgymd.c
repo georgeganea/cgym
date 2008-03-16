@@ -17,10 +17,10 @@
 #define BUF_MAX_SIZE 64
 #define ADD 16
 
-
 void *client_handler(void *p);
-int cgymd_send(int sock, char *buf, unsigned long len);
 char* readline(int fd);
+int cgymd_send(int fd, char *buf, unsigned long len);
+
 char *homedir;
 int main(int argc, char**argv){
 	int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -111,11 +111,11 @@ void* client_handler(void *p){
 	char *tmp;
 	char * command,*file=NULL,*dir=NULL,*start=NULL,*stop=NULL;
 	char *buffer,*s=NULL;
-	int r=-1,n=0,siz=0,i,cmd=-1; 
-	if (cgymd_send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG)) == -1){
-	      perror("send");
-	      pthread_exit(NULL);
-	}
+	int r=-1,n=0,siz=0,i,cmd=-1;
+	int rc = 0;
+	do{
+		rc = cgymd_send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG));
+	}while (rc ==1);	
 	s = readline(fd);
 	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
 	i=0;
@@ -142,10 +142,9 @@ void* client_handler(void *p){
 			break;
 		}
 		default:{ //too many arguments
-			if (cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG)) == -1){
-				perror("send");
-				pthread_exit(NULL);
-			}
+			do{
+				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+			}while (rc ==1);
 		}
 		}
 		s=s+strlen(tmp)+1;
@@ -160,39 +159,36 @@ void* client_handler(void *p){
 		FILE_INFO* file_info;
 		file_info = list(homedir,dir);
 		if(file_info==NULL){
-			if (cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG)) == -1){
-				perror("send");
-			}
+			do {
+				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+			} while(rc == 1);
 			pthread_exit(NULL);
 		}
-		
-		if (cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG)) == -1){
-			perror("send");
-			pthread_exit(NULL);
-		}
-		printf("OK is sent!\n");
+		do {		
+			rc = cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG));
+		} while(rc == 1);
 		while (file_info->next) {
-			usleep(1000);
 			char *buffer=cgym_entry_tostring(file_info->entry_file);
 			unsigned long dim=strlen(buffer);
+			/*
 			int j;
-			printf("dim=%d\n",dim);
 			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
 				//printf("Send  %d\n",j);
-				if (cgymd_send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE)) == -1){
+				if (cgymd_send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
 					perror("send");		
 					pthread_exit(NULL);
 				}
 			}
-			printf("line sent %d!\n",j);
-			file_info = file_info->next;
-			sleep(1);
+			*/
+			do {		
+				rc = cgymd_send(fd, buffer, strlen(buffer));
+			} while(rc == 1);			
+			file_info = file_info->next; 
 		}
-		if (cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG)) == -1){
-			perror("send");
-			pthread_exit(NULL);
-		}
-		printf("end sent!\n");
+		printf("am trimis lista\n");
+		do {		
+			rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
+		} while(rc == 1);
 		break;
 	}
 	case 1 :{ //SIZE
@@ -201,28 +197,39 @@ void* client_handler(void *p){
 		cgym_entry_t * entry_info = size(homedir,file);
 		char *buffer;//=cgym_entry_tostring(entry_info);
 		if(entry_info==NULL){
-			if (cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG)) == -1){
-				perror("send");
-			}
+			do{
+				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+			}while (rc ==1);
 			pthread_exit(NULL);
 		}
 		buffer=cgym_entry_tostring(entry_info);
-		if (cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG)) == -1){
-			perror("send");
-			pthread_exit(NULL);
-		} 
+		do{
+			rc = cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG));
+		}while (rc ==1);
 		unsigned long dim=strlen(buffer);
 		int j;
+		
+		do{
+			rc = cgymd_send(fd, buffer, strlen(buffer));
+		}while (rc ==1);
+/*
 		for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
-			if (cgymd_send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE)) == -1){
+			if (send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
 				perror("send");			
 				pthread_exit(NULL);
 			}
 		}
-		if (cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG)) == -1){
+		*/
+		
+		do{
+			rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
+		}while (rc ==1);
+/*
+		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		}
+*/		
 		break;
 	}
 	case 2 :{ //GET
@@ -235,28 +242,45 @@ void* client_handler(void *p){
 		
 		char* file_contents = get(start,stop,homedir,file);
 		if (file_contents == NULL){
-			if (cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG)) == -1){
+			
+			do{
+				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+			}while (rc ==1);
+/*
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 				perror("send");		
 			}
+*/
 			pthread_exit(NULL);
 		}
 		else{
-			if (cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG)) == -1){
+			if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
 		      perror("send");
 		      pthread_exit(NULL);
 			}
 			unsigned long dim=strlen(file_contents);
 			int j;
+			do{
+				rc = cgymd_send(fd, file_contents, strlen(file_contents));
+			}while (rc ==1);
+/*
+			
 			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
-				if (cgymd_send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE)) == -1){
+				if (send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE), 0) == -1){
 					perror("send");		
 					pthread_exit(NULL);
 				}
 			}
-			if (cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG)) == -1){
+*/
+			do{
+				rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
+			}while (rc ==1);
+/*
+			if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 				perror("send");
 				pthread_exit(NULL);
 			}
+*/
 		}
 		break;
 	}
@@ -264,13 +288,18 @@ void* client_handler(void *p){
 		break;
 	}
 	default:{ //Command not found
-		if (cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG)) == -1){
+		do{
+			rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+		}while (rc ==1);
+		
+/*		
+		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
 			perror("send");
 			pthread_exit(NULL);
 		}
+		*/
 	}
 	}
-	printf("END!\n");
 	close(fd);
 	pthread_exit(NULL);
 	
@@ -301,37 +330,33 @@ char* readline(int fd) {
 	return str;
 } 
 
-int cgymd_send(int sock, char *buf, unsigned long len) {
-	int rc = 0,pos_send=0;
-	
-	if (sock > 0) {
-		if (pos_send < len) {
-				rc = send(sock,
-						buf + pos_send, len - pos_send, 0);
-				
-				if (rc == len - pos_send) {
-					// am trimis tot
-					pos_send = 0;
-					rc = 0;
-				} else if (rc > 0) {
-					// am trimis o parte
-					pos_send += rc;
-					rc = 1;
-				} else if (rc < 0) {
-					if (errno == EAGAIN) {
-						// would block, try again
-						rc = 1;
-					} else {
-						// some real error
-						rc = 2;
-					}
-				}
-		} else { // functia nu este folosita cum trebuie
-			rc = 3;
+
+int cgymd_send(int fd, char *buf, unsigned long len) {
+	int rc = 0;	
+	int k = 0;
+	if (k < len) {
+		rc = send(fd,
+					buf + k, len - k, 0);
+		char tmp[20];
+		sprintf(tmp, "sent[%ld,%d]: %%.%lds\n", len -k, rc, len - k);
+		printf(tmp, buf + k);
+		if (rc == len - k) {
+			// am trimis tot
+			k = 0;
+			rc = 0;
+		} else if (rc > 0) {
+			// am trimis o parte
+			k += rc;
+			rc = 1;
+		} else if (rc < 0) {
+			// some real error
+			rc = 2;
 		}
-	} else 	{
+	} 
+	else 
 		return 4;
-	}
-	printf("Sent %d bytes!",rc);
 	return rc;
 }
+
+
+

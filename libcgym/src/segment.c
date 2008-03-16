@@ -169,11 +169,15 @@ int cgym_segment_assemble(cgym_entry_t *e, char *md5, cgym_segment_t **s){
 	int i=0;
 	int k=0;
 	while((s[k])!=NULL){
-		if ((((s[k])->stop) - ((s[k])->start) - (strlen((s[k])->buf))+1)!=0){
+		/*if ((((s[k])->stop) - ((s[k])->start) - (strlen((s[k])->buf))+1)!=0){
 			printf("pozitiile si lungimea bufferului nu corespund la segmentul care incepe la offset:%ld\n",(*s)->start);
+		}*/
+		if ((s[k])->status != CGYM_SEGMENT_DONE){
+			printf("segmentul care incepe de la la offset:%ld nu este complet\n",(*s)->start);
+			return 1;
 		}
 		if (!fseek(f,(s[k])->start,SEEK_SET)){
-			for (i=((s[k])->start);i<=((s[k])->stop);i++){
+			for (i=((s[k])->start);i<((s[k])->stop);i++){
 				fputc(((s[k])->buf[i-((s[k])->start)]),f);
 			}
 		}

@@ -76,7 +76,15 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 			}
 
 			if (sock->state == CGYM_SOCK_RECV_SIZE_DATA) {
+				char tmp[20];
+				printf("pos_recv = %ld\n", sock->pos_recv);
 				rc = cgym_recv(sock, MAX_LINE_LEN + 1); // ca sa fim siguri ca primim tot
+				printf("recv(sock, %d) = %d\n", MAX_LINE_LEN + 1, rc);
+				printf("pos_recv = %ld\n", sock->pos_recv);
+				sprintf(tmp, "buf[%d-%ld]: `%%.%lds'\n",
+						0, sock->pos_recv,
+						sock->pos_recv);
+				printf(tmp, sock->buf);
 				
 				if (rc == 1) {
 					// am primit ceva?
@@ -112,6 +120,7 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 						printf("nu avem ce citi pe moment!\n");
 					}
 				} else if (rc == 0) {
+					// TODO: lungimea e fix MAX_LINE_LEN+1
 					printf("Nu se poate!\n");
 					rc = 4;
 				}
@@ -198,7 +207,15 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 		if (sock != NULL) {
 			if (e != NULL) {
 				if (sock->state == CGYM_SOCK_RECV_GET_REPLY) {
+					char tmp[20];
+					printf("pos_recv = %ld\n", sock->pos_recv);
 					rc = cgym_recv(sock, strlen(CGYM_OK_MSG));
+					printf("recv(sock, %d) = %d\n", strlen(CGYM_OK_MSG), rc);
+					printf("pos_recv = %ld\n", sock->pos_recv);
+					sprintf(tmp, "buf[%d-%d]: `%%.%ds'\n",
+							0, strlen(CGYM_OK_MSG),
+							strlen(CGYM_OK_MSG));
+					printf(tmp, sock->buf);
 					s->status = CGYM_SEGMENT_STARTED;
 					
 					if (rc == 0) {
@@ -220,9 +237,17 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 				}
 	
 				if (sock->state == CGYM_SOCK_RECV_GET_DATA) {
+					char tmp[20];
+					printf("pos_recv = %ld\n", sock->pos_recv);
 					rc = cgym_recv(sock, s->stop - s->start + 2); // plus \r\n la sfarsit
+					printf("recv(sock, %ld) = %d\n", s->stop - s->start + 2, rc);
+					printf("pos_recv = %ld\n", sock->pos_recv);
 					
 					if (rc == 0) {
+						sprintf(tmp, "buf[%ld-%ld]: `%%.%lds'\n",
+								s->start, s->stop + 2,
+								s->stop - s->start + 2);
+						printf(tmp, sock->buf);
 						if (sock->buf[s->stop - s->start] == '\r'
 							&& sock->buf[s->stop - s->start + 1] == '\n') {
 							printf("am primit tot fisierul (si \\r\\n la sfarsit)\n"
@@ -232,16 +257,17 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 							s->status = CGYM_SEGMENT_DONE;
 						} else {
 							printf("Eroare: segmentul nu se termina cu \\r\\n\n");
-							printf("buf[%ld,%ld] = '%c%c'",
-									s->stop - s->start,
-									s->stop - s->start +1,
-									sock->buf[s->stop - s->start],
-									sock->buf[s->stop - s->start + 1]);
-							rc = 4;
+							rc = 5;
 						}
 					} else if (rc > 1) {
 						s->status = CGYM_SEGMENT_IDLE;
-					} // else - incomplet
+						rc = 4;
+					} else {
+						sprintf(tmp, "buf[%ld-%ld]: `%%.%lds'\n",
+								s->start, s->stop + 2,
+								sock->pos_recv);
+						printf(tmp, sock->buf);
+					}
 				}
 			} else {
 				rc = 3;

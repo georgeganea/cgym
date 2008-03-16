@@ -293,11 +293,13 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 				rc = recv(sock->sockfd,
 						sock->buf + sock->pos_recv, len - sock->pos_recv, 0);
 				
-				if (rc > 0)
-					printf("received %d: %c%c...\n",
-								rc,
-								sock->buf[sock->pos_recv],
-								sock->buf[sock->pos_recv+1]);
+				if (rc > 0) {
+					char tmp[40];
+					sprintf(tmp, "received %d: `%%.%ds'", rc, rc);
+					printf(tmp, sock->buf);
+				} else {
+					printf("received: nothing (rc=%d)\n", rc);
+				}
 				
 				if (rc == len - sock->pos_recv) {
 					//sock->pos_recv += rc;

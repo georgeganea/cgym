@@ -167,6 +167,7 @@ void cgym_segment_free(cgym_segment_t *s) {
 int cgym_segment_assemble(cgym_entry_t *e, cgym_segment_t **s){
 	FILE *f = fopen(e->file,"w+");
 	int k=0;
+	printf("cream %s\n", e->file);
 	while((s[k])!=NULL){
 		if (f == NULL) {
 			printf("eroare la crearea fisierului\n");

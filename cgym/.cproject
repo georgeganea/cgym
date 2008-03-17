@@ -30,7 +30,9 @@
 <option id="gnu.c.compiler.exe.debug.option.debugging.level.1592120628" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.preprocessor.nostdinc.1464408912" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc"/>
 <option id="gnu.c.compiler.option.preprocessor.preprocess.1100368581" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
-<option id="gnu.c.compiler.option.preprocessor.def.symbols.1298734201" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.1298734201" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="DEBUG_CGYM"/>
+</option>
 <option id="gnu.c.compiler.option.preprocessor.undef.symbol.1167223958" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol"/>
 <option id="gnu.c.compiler.option.include.paths.1315426627" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/libcgym/src}&quot;"/>

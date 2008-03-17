@@ -64,10 +64,14 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 					if (strncmp(sock->buf, CGYM_OK_MSG, strlen(CGYM_OK_MSG))) {
 						// serverul a raspuns (probabil) cu ERR\r\n
 						rc = 2;
+#ifdef DEBUG_CGYM
 						printf("NU E OK: %4s...\n", sock->buf);
+#endif
 						sock->state = CGYM_SOCK_CONNECTED;
 					} else {
+#ifdef DEBUG_CGYM
 						printf("E OK: pos_recv = %ld\n", sock->pos_recv);
+#endif
 						sock->state = CGYM_SOCK_RECV_SIZE_DATA;
 					}
 				} else if (rc > 1) {
@@ -76,15 +80,19 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 			}
 
 			if (sock->state == CGYM_SOCK_RECV_SIZE_DATA) {
+#ifdef DEBUG_CGYM
 				char tmp[20];
 				printf("pos_recv = %ld\n", sock->pos_recv);
+#endif
 				rc = cgym_recv(sock, MAX_LINE_LEN + 1); // ca sa fim siguri ca primim tot
+#ifdef DEBUG_CGYM
 				printf("recv(sock, %d) = %d\n", MAX_LINE_LEN + 1, rc);
 				printf("pos_recv = %ld\n", sock->pos_recv);
 				sprintf(tmp, "buf[%d-%ld]: `%%.%lds'\n",
 						0, sock->pos_recv,
 						sock->pos_recv);
 				printf(tmp, sock->buf);
+#endif
 				
 				if (rc == 1) {
 					// am primit ceva?
@@ -114,14 +122,20 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 							}
 						} else {
 							// mai trebuie sa citim
+#ifdef DEBUG
 							printf("incomplet. mai trebuie citit...\n");
+#endif
 						}
 					} else {
+#ifdef DEBUG_CGYM
 						printf("nu avem ce citi pe moment!\n");
+#endif
 					}
 				} else if (rc == 0) {
 					// TODO: lungimea e fix MAX_LINE_LEN+1
+#ifdef DEBUG_CGYM
 					printf("Nu se poate!\n");
+#endif
 					rc = 4;
 				}
 			}
@@ -133,7 +147,9 @@ int cgym_recv_size_reply(cgym_sock_t *sock, cgym_entry_t **e) {
 	}
 	
 	if (rc > 1) { // o eroare -- eliberam buffer-ul
+#ifdef DEBUG_CGYM
 		printf("Eliberam buffer-ul...\n");
+#endif
 		cgym_sock_clear(sock);
 	}
 	
@@ -158,8 +174,10 @@ int cgym_send_get_req(cgym_segment_t *s) {
 			if (filename != NULL) {
 				if ((buf = malloc(strlen(CGYM_GET_MSG)
 								+ strlen(filename) + 21)) != NULL) {
+#ifdef DEBUG_CGYM
 					printf("creating GET request: %ld, %ld, %s\n",
 							s->start, s->stop, filename);
+#endif
 					sprintf(buf, CGYM_GET_MSG, s->start, s->stop, filename);
 
 					// TODO: fa-l cu select()
@@ -207,26 +225,33 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 		if (sock != NULL) {
 			if (e != NULL) {
 				if (sock->state == CGYM_SOCK_RECV_GET_REPLY) {
+#ifdef DEBUG_CGYM
 					char tmp[20];
 					printf("pos_recv = %ld\n", sock->pos_recv);
+#endif
 					rc = cgym_recv(sock, strlen(CGYM_OK_MSG));
+#ifdef DEBUG_CGYM
 					printf("recv(sock, %d) = %d\n", strlen(CGYM_OK_MSG), rc);
 					printf("pos_recv = %ld\n", sock->pos_recv);
 					sprintf(tmp, "buf[%d-%d]: `%%.%ds'\n",
 							0, strlen(CGYM_OK_MSG),
 							strlen(CGYM_OK_MSG));
 					printf(tmp, sock->buf);
-					
+#endif
 					
 					if (rc == 0) {
 						// am primit tot raspunsul (OK ?)
 						if (strncmp(sock->buf, CGYM_OK_MSG, strlen(CGYM_OK_MSG))) {
 							// serverul a raspuns (probabil) cu ERR\r\n
 							rc = 2;
+#ifdef DEBUG_CGYM
 							printf("NU E OK: %4s...\n", sock->buf);
+#endif
 							sock->state = CGYM_SOCK_CONNECTED;
 						} else {
+#ifdef DEBUG_CGYM
 							printf("E OK: pos_recv = %ld\n", sock->pos_recv);
+#endif
 							s->status = CGYM_SEGMENT_STARTED;
 							sock->state = CGYM_SOCK_RECV_GET_DATA;
 						}
@@ -238,37 +263,49 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 				}
 	
 				if (sock->state == CGYM_SOCK_RECV_GET_DATA) {
+#ifdef DEBUG_CGYM
 					char tmp[50];
 					printf("pos_recv = %ld\n", sock->pos_recv);
+#endif
 					rc = cgym_recv(sock, s->stop - s->start + 2); // plus \r\n la sfarsit
+#ifdef DEBUG_CGYM
 					printf("recv(sock, %ld) = %d\n", s->stop - s->start + 2, rc);
 					printf("pos_recv = %ld\n", sock->pos_recv);
+#endif
 					
 					if (rc == 0) {
+#ifdef DEBUG_CGYM
 						sprintf(tmp, "buf[%ld-%ld]: `%%.%lds'\n",
 								s->start, s->stop + 2,
 								s->stop - s->start + 2);
 						printf(tmp, sock->buf);
+#endif
 						if (sock->buf[s->stop - s->start] == '\r'
 							&& sock->buf[s->stop - s->start + 1] == '\n') {
+#ifdef DEBUG_CGYM
 							printf("am primit tot fisierul (si \\r\\n la sfarsit)\n"
 									"buf: %.4s...\n", sock->buf);
+#endif
 							
 							s->buf = sock->buf;
 							s->sock->state = CGYM_SOCK_CONNECTED;
 							s->status = CGYM_SEGMENT_DONE;
 						} else {
+#ifdef DEBUG_CGYM
 							printf("Eroare: segmentul nu se termina cu \\r\\n\n");
+#endif
 							rc = 5;
 						}
 					} else if (rc > 1) {
 						s->status = CGYM_SEGMENT_IDLE;
 						rc = 4;
 					} else {
+#ifdef DEBUG_CGYM
 						sprintf(tmp, "(i) buf[%ld-%ld]: `%%.%lds'\n",
 								s->start, s->stop + 2,
 								sock->pos_recv);
 						printf(tmp, sock->buf);
+#endif
 					}
 				}
 			} else {
@@ -279,7 +316,9 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 		}
 		
 		if (rc > 1) { // o eroare -- eliberam buffer-ul
+#ifdef DEBUG_CGYM
 			printf("Eliberam buffer-ul...\n");
+#endif
 			cgym_sock_clear(sock);
 		}
 	}

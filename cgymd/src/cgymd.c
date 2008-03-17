@@ -120,6 +120,7 @@ void* client_handler(void *p) {
 
 	while (1) {
 		s = readline(fd);
+		printf("Comanda:%s\n",s);
 		if (s==NULL) {
 			close(fd);
 			pthread_exit(NULL);
@@ -288,9 +289,6 @@ void* client_handler(void *p) {
 		if (k < len) {
 			rc = send(fd,
 						buf + k, len - k, 0);
-			char tmp[20];
-			sprintf(tmp, "sent[%ld,%d]: %%.%lds\n", len -k, rc, len - k);
-			printf(tmp, buf + k);
 			if (rc == len - k) {
 				// am trimis tot
 				k = 0;

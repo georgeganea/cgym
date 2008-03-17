@@ -18,7 +18,7 @@ FILE_INFO* list(char* path, char* dirname);
  * Fuction for reading the contents of a file
  */
 
-char* get(char* start, char* stop, char* path, char* filename);
+char* get(char* start, char* stop, char* path, char* filename, int* number);
 
 /*
  * Function that returns the size of a file

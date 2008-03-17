@@ -6,7 +6,7 @@
 #include "libcgym.h"
 #include "cgymd.h"
 
-char* get(char* start, char* stop, char* path, char* filename){
+char* get(char* start, char* stop, char* path, char* filename, int* number){
 	unsigned long start_position;
 	unsigned long end_position;
 	char* ep;
@@ -56,6 +56,7 @@ char* get(char* start, char* stop, char* path, char* filename){
 		fprintf(stderr,"Eroare la fread");
 		return NULL;
 	}
+	*number = end_position-start_position;
 	*(buff+(end_position-start_position)) = '\0';
 	fclose(f);
 	return buff;

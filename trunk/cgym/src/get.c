@@ -57,7 +57,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  	cgym_entry_info(e);
  	cgym_sock_info(sock);
  	
- 	if ( cgym_entry_type(e) != CGYM_ENTRY_FILE ) {
+ 	if (cgym_entry_type(e) != CGYM_ENTRY_FILE) {
  		printf("Error: entry is not a file.\n");
  		return 5;
  	}
@@ -68,6 +68,11 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  	
  	printf("Alocam memorie pentru segmente...\n");
 #endif
+ 	
+ 	// cel mult un segment per octet
+ 	if (nr_segm > cgym_entry_size(e)) {
+ 		nr_segm = cgym_entry_size(e);
+ 	}
  	
  	if ((segm = malloc(sizeof(*segm) * (nr_segm + 1))) == NULL) {
  		perror("malloc");

@@ -33,7 +33,7 @@ int cgym_list(cgym_server_t *s, char *path) {
 	 */
 	switch (i){
 	case 0:{
-		sleep(1);
+		//sleep(2);
     	cgym_send_list_req(my_socket,path);
 		cgym_entry_t **e;
 		cgym_recv_list_reply(my_socket,&e);

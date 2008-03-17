@@ -271,7 +271,14 @@ void* client_handler(void *p) {
 			}
 			if (c=='\r'){
 				str[size++] = ' ';
-				break;
+				if ((len = recv(fd,&c,1,0))>0){
+					if (c=='\n')
+						break;
+					else 
+						return NULL;
+				}
+				else
+					return NULL;
 			}
 			str[size++] = c;
 		}

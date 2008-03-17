@@ -21,6 +21,7 @@
 #define CGYM_QUIT_MSG "QUIT\r\n"
 #define CGYM_END_MSG "\r\n"
 #define CGYM_OK_MSG "OK\r\n"
+
 typedef struct cgym_server_t_ cgym_server_t;
 
 /*
@@ -29,6 +30,8 @@ typedef struct cgym_server_t_ cgym_server_t;
  cgym_server_t *cgym_server_info_create(char *server);
  void cgym_server_info_free(cgym_server_t *server);
  void cgym_server_info_print(cgym_server_t *server);
+ 
+ void cgym_server_remove(cgym_server_t **server);
   
 enum cgym_sock_state {
 	CGYM_SOCK_NONE,
@@ -54,6 +57,7 @@ cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
 void cgym_sock_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
 
+cgym_sock_t *cgym_sock_setup(cgym_server_t **curr, cgym_server_t **head);
 
 enum cgym_entry_type {
 	CGYM_ENTRY_NONE,

@@ -48,6 +48,7 @@ int cgym_segment_set_sock(cgym_segment_t *s, cgym_sock_t *sock) {
 	int rc = 0;
 	
 	if (s != NULL) {
+		s->status = CGYM_SEGMENT_IDLE;
 		s->sock = sock;
 	} else {
 		rc = 1;
@@ -169,12 +170,12 @@ int cgym_segment_assemble(cgym_entry_t *e, cgym_segment_t **s){
 	char *name = cgym_get_file_name(e->file), *md5;
 	int k=0;
 
+	printf("cream %s\n", name);
+	if ((f = fopen(name,"w+")) == NULL) {
+		printf("eroare la crearea fisierului\n");
+		return 1;
+	}
 	while((s[k])!=NULL){
-		printf("cream %s\n", name);
-		if ((f = fopen(name,"w+")) == NULL) {
-			printf("eroare la crearea fisierului\n");
-			return 1;
-		}
 		if ((s[k])->status != CGYM_SEGMENT_DONE){
 			printf("segmentul care incepe de la la offset:%ld nu este complet\n",(*s)->start);
 			return 1;

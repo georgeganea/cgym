@@ -56,6 +56,7 @@ enum cgym_sock_state cgym_sock_get_state(cgym_sock_t *sock);
 cgym_server_t *cgym_sock_get_server(cgym_sock_t *sock);
 void cgym_sock_info(cgym_sock_t *sock);
 void cgym_sock_free(cgym_sock_t *sock);
+int cgym_sock_close(cgym_sock_t *sock);
 
 cgym_sock_t *cgym_sock_setup(cgym_server_t **curr, cgym_server_t **head);
 
@@ -93,6 +94,7 @@ int cgym_segment_set_sock(cgym_segment_t *s, cgym_sock_t *sock);
 cgym_entry_t *cgym_segment_entry(cgym_segment_t *s);
 unsigned long cgym_segment_start(cgym_segment_t *s);
 unsigned long cgym_segment_stop(cgym_segment_t *s);
+enum cgym_segment_status cgym_segment_status(cgym_segment_t *s);
 char *cgym_segment_buf(cgym_segment_t *s);
 void cgym_segment_free(cgym_segment_t *s);
 

@@ -304,7 +304,6 @@ cgym_sock_t *cgym_sock_setup(cgym_server_t **curr, cgym_server_t **head) {
 	 	if ((ret = cgym_sock_setblocking(sock, 0)) != 0) {
 	 		printf("Error[%d]: Could not set socket to nonblocking mode\n", ret);
 	 		cgym_sock_info(sock);
-	 		printf("\n");
 	 		
 	 		cgym_sock_free(sock);
 	 		return NULL; // eroare mai grava, nu am putut pune nonblocking
@@ -314,7 +313,6 @@ cgym_sock_t *cgym_sock_setup(cgym_server_t **curr, cgym_server_t **head) {
 	 		cgym_sock_info(sock);
 	 		printf("Error[%d]: Could not connect to ", ret);
 	 		cgym_server_info_print( cgym_sock_get_server(sock) );
-	 		printf("\n");
 	 		
 	 		cgym_sock_free(sock);
 	 		cgym_server_remove(curr);

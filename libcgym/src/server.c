@@ -57,9 +57,9 @@ void cgym_server_info_free(cgym_server_t *server) {
 
 void cgym_server_info_print(cgym_server_t *server) {
 	if (server != NULL) {
-		printf("%s:%d", server->addr, server->port);
+		printf("%s:%d\n", server->addr, server->port);
 	} else {
-		printf("(null)");
+		printf("(null)\n");
 	}
 }
 

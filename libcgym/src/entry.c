@@ -78,10 +78,10 @@ void cgym_entry_info(cgym_entry_t *e) {
 			default: tmp="Unknown type";
 		}
 		
-		printf("entry:[name=%s,len=%ld,md5=%s,type=%s]",
-						e->file, e->size, e->md5, tmp);
+		printf("entry:[name=%s,len=%ld,md5=%s,type=%s]\n",
+				e->file, e->size, e->md5, tmp);
 	} else {
-		printf("(null)");
+		printf("(null)\n");
 	}
 }
 

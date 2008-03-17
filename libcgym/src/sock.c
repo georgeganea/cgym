@@ -104,8 +104,6 @@ void cgym_sock_info(cgym_sock_t *sock) {
 	char *ptr;
 	
 	if (sock != NULL) {
-		printf("[%d]%s:%d  ",
-			sock->sockfd, sock->server->addr, sock->server->port);
 		switch (sock->state) {
 			case CGYM_SOCK_NONE: ptr = "NONE"; break;
 			case CGYM_SOCK_IDLE: ptr = "IDLE"; break;
@@ -121,12 +119,15 @@ void cgym_sock_info(cgym_sock_t *sock) {
 			case CGYM_SOCK_ERR: ptr = "ERR"; break;
 			default: ptr = "Unknown state"; break;
 		}
-		printf("%s (%d)", ptr, sock->state);
 		
-		printf("buf[cap=%ld,pos=%ld,s=%p]",
+		printf("[%d]%s:%d  "
+				"%s (%d)"
+				"buf[cap=%ld,pos=%ld,s=%p]\n",
+				sock->sockfd, sock->server->addr, sock->server->port,
+				ptr, sock->state,
 				sock->capacity, sock->pos_recv, (void *)sock->buf);
 	} else {
-		printf("(null)");
+		printf("(null)\n");
 	}
 }
 
@@ -137,11 +138,7 @@ void cgym_sock_info(cgym_sock_t *sock) {
  */
 void cgym_sock_free(cgym_sock_t *sock) {
 	if (sock != NULL) {
-		if (sock->state != CGYM_SOCK_NONE
-				&& sock->state != CGYM_SOCK_IDLE) { // connected
-			close(sock->sockfd);
-		}
-		
+		cgym_sock_close(sock);
 		cgym_sock_clear(sock);
 		free(sock);
 	}
@@ -250,6 +247,7 @@ int cgym_sock_connect(cgym_sock_t *sock) {
 			if (rc == 0) { // am reusit!
 				sock->state = CGYM_SOCK_CONNECTED;
 			} else if (rc > 1) { // eroare
+				printf("Eroare la handshake: %d\n", rc);
 				sock->state = CGYM_SOCK_ERR;
 				rc = 6;
 			}
@@ -273,6 +271,7 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 	int rc = 0;
 	char *tmp;
 	
+	printf("cgym_recv()\n");
 	if (sock != NULL) {
 		if (len > sock->capacity) {
 			tmp = realloc(sock->buf, len);
@@ -288,37 +287,37 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 				
 				rc = 4;
 			}
+		}
+		
+		if (!rc) {
+			rc = recv(sock->sockfd,
+					sock->buf + sock->pos_recv, len - sock->pos_recv, 0);
 			
-			if (!rc) {
-				rc = recv(sock->sockfd,
-						sock->buf + sock->pos_recv, len - sock->pos_recv, 0);
-				
-				if (rc > 0) {
-					char tmp[40];
-					sprintf(tmp, "received %d: `%%.%ds'", rc, rc);
-					printf(tmp, sock->buf);
-				} else {
-					printf("received: nothing (rc=%d)\n", rc);
-				}
-				
-				if (rc == len - sock->pos_recv) {
-					//sock->pos_recv += rc;
-					sock->pos_recv = 0;
-					rc = 0; // gata
-				} else if (rc > 0) {
-					// mai avem de primit
-					sock->pos_recv += rc;
+			if (rc > 0) {
+				char tmp[40];
+				sprintf(tmp, "received %d: `%%.%ds'", rc, rc);
+				printf(tmp, sock->buf);
+			} else {
+				printf("received: nothing (rc=%d)\n", rc);
+			}
+			
+			if (rc == len - sock->pos_recv) {
+				//sock->pos_recv += rc;
+				sock->pos_recv = 0;
+				rc = 0; // gata
+			} else if (rc > 0) {
+				// mai avem de primit
+				sock->pos_recv += rc;
+				rc = 1;
+			} else if (rc == 0) {
+				// s-a inchis conexiunea
+				rc = 2;
+			} else if (rc < 0) {
+				if (errno == EAGAIN) {
 					rc = 1;
-				} else if (rc == 0) {
-					// s-a inchis conexiunea
-					rc = 2;
-				} else if (rc < 0) {
-					if (errno == EAGAIN) {
-						rc = 1;
-					} else {
-						// eroare
-						rc = 3;
-					}
+				} else {
+					// eroare
+					rc = 3;
 				}
 			}
 		}
@@ -326,7 +325,7 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 		rc = 5;
 	}
 	
-	printf("end of sock_recv(): ");
+	printf("cgym_recv(): end (rc=%d) ", rc);
 	cgym_sock_info(sock);
 	printf("\n");
 	
@@ -394,6 +393,7 @@ int cgym_recv_handshake(cgym_sock_t *sock) {
 		// am primit tot
 		if (strncmp(sock->buf, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG))) {
 			// nu e bun
+			printf("Am primit: %.4s\n", sock->buf);
 			rc = 2;
 		} else {
 			cgym_sock_clear(sock);
@@ -422,6 +422,23 @@ int cgym_send_quit(cgym_sock_t *sock) {
 		do {
 			rc = cgym_send(sock, CGYM_QUIT_MSG, strlen(CGYM_QUIT_MSG));
 		} while (rc == 1); // inca nu a terminat
+	} else {
+		rc = 2;
+	}
+	
+	return rc;
+}
+
+int cgym_sock_close(cgym_sock_t *sock) {
+	int rc = 0;
+	
+	if (sock != NULL) {
+		if (sock->state != CGYM_SOCK_NONE
+				&& sock->state != CGYM_SOCK_IDLE) { // connected
+			if (close(sock->sockfd)) {
+				rc = 3;
+			}
+		}
 	} else {
 		rc = 2;
 	}

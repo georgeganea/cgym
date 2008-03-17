@@ -238,7 +238,7 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 				}
 	
 				if (sock->state == CGYM_SOCK_RECV_GET_DATA) {
-					char tmp[20];
+					char tmp[50];
 					printf("pos_recv = %ld\n", sock->pos_recv);
 					rc = cgym_recv(sock, s->stop - s->start + 2); // plus \r\n la sfarsit
 					printf("recv(sock, %ld) = %d\n", s->stop - s->start + 2, rc);
@@ -252,8 +252,8 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 						if (sock->buf[s->stop - s->start] == '\r'
 							&& sock->buf[s->stop - s->start + 1] == '\n') {
 							printf("am primit tot fisierul (si \\r\\n la sfarsit)\n"
-									"buf: %.4s\n", sock->buf);
-						
+									"buf: %.4s...\n", sock->buf);
+							
 							s->buf = sock->buf;
 							s->sock->state = CGYM_SOCK_CONNECTED;
 							s->status = CGYM_SEGMENT_DONE;
@@ -265,7 +265,7 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 						s->status = CGYM_SEGMENT_IDLE;
 						rc = 4;
 					} else {
-						sprintf(tmp, "buf[%ld-%ld]: `%%.%lds'\n",
+						sprintf(tmp, "(i) buf[%ld-%ld]: `%%.%lds'\n",
 								s->start, s->stop + 2,
 								sock->pos_recv);
 						printf(tmp, sock->buf);

@@ -271,9 +271,10 @@ int cgym_recv(cgym_sock_t *sock, unsigned long len) {
 	int rc = 0;
 	char *tmp;
 	
-	printf("cgym_recv()\n");
+	printf("cgym_recv(%p, %ld), capacity = %ld\n", (void *)sock, len, sock->capacity);
 	if (sock != NULL) {
 		if (len > sock->capacity) {
+			printf("allocating %ld bytes...\n", len);
 			tmp = realloc(sock->buf, len);
 			if (tmp != NULL) {
 				sock->buf = tmp;

@@ -285,3 +285,44 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 	
 	return rc;
 }
+
+cgym_sock_t *cgym_sock_setup(cgym_server_t **curr, cgym_server_t **head) {
+	cgym_sock_t *sock;
+	int ret, done = 0;
+
+	while (head != NULL && !done) {
+		if (curr == NULL)
+			curr = head;
+	 	
+		if ((sock = cgym_sock_create(*curr)) == NULL) {
+	 		printf("Error: could not create socket.\n");
+	 		
+	 		cgym_server_remove(curr);
+	 		continue; // nu am putut crea socket (host inexistent, sistem ?)
+	 	}
+
+	 	if ((ret = cgym_sock_setblocking(sock, 0)) != 0) {
+	 		printf("Error[%d]: Could not set socket to nonblocking mode\n", ret);
+	 		cgym_sock_info(sock);
+	 		printf("\n");
+	 		
+	 		cgym_sock_free(sock);
+	 		return NULL; // eroare mai grava, nu am putut pune nonblocking
+	 	}
+		
+	 	if ((ret = cgym_sock_connect(sock)) > 1) {
+	 		cgym_sock_info(sock);
+	 		printf("Error[%d]: Could not connect to ", ret);
+	 		cgym_server_info_print( cgym_sock_get_server(sock) );
+	 		printf("\n");
+	 		
+	 		cgym_sock_free(sock);
+	 		cgym_server_remove(curr);
+	 		continue; // trecem la serverul urmator
+	 	}
+	 	
+	 	done = 1; // gata, iesim!
+	}
+ 	
+ 	return sock;
+}

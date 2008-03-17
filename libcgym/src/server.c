@@ -62,3 +62,11 @@ void cgym_server_info_print(cgym_server_t *server) {
 		printf("(null)");
 	}
 }
+
+void cgym_server_remove(cgym_server_t **server) {
+	if (server != NULL) {
+		while (*server != NULL) {
+			*server = *(server+1);
+		}
+	}
+}

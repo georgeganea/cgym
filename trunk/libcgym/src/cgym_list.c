@@ -50,32 +50,33 @@ void clear(char entr[]){
 const int ADD = 16;
 int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 	//int size =128;
-	char *p;
+	
 	char c;
 	int s;
 	char *entr=malloc(1024);
 	int i=0;
 	
-	char *type= malloc(1);
-	char *size = malloc(21);
-	char *md5=malloc(33);
-	char *fil= malloc(512);
-	int lim = -1;
+	char *type= NULL;
+	char *size ;
+	char *md5;
+	char *fil;
+	
 	int siz=0;
 	cgym_entry_t ** point=NULL;//=malloc(sizeof(cgym_entry_t*));
 	cgym_entry_t ** head=NULL;// point;
 	
-	p = malloc(1);
-	sock->buf=p;
+	//p = malloc(1);
+	printf("orice\n");
+	int k=0;
+	while ((k=recv(sock->sockfd,&c,1,0))==1){
 	
-	while (recv(sock->sockfd,p,1,0)==1){
-		//printf("%c",*p);
-		c = *p;
+	//	printf("%c",c);
+		
 		entr[i]=c;
-		//printf("|%10s|",entr);
+		
 		i++;
 		if ('\n'==c){
-			usleep(122);
+		       
 						if (entr[0]=='\r'){
 							printf("am iesit \n");
 								break;
@@ -87,7 +88,8 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 							exit(1);
 						}
 					    if (entr[0]=='O'){
-						printf("serverul zice ok, acuma trimite lista:\n");}
+						printf("serverul zice ok, acuma trimite lista:\n");
+						}
 					    else{
 						
 						type = strtok(entr," ");
@@ -95,22 +97,22 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 						size = strtok(NULL," ");
 						md5  = strtok(NULL," ");
 						fil  = strtok(NULL,"\r");
+						printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
+						
 						if (type != NULL &&
 							size != NULL &&
 							md5  != NULL &&
 							fil  != NULL   ){
-							//printf("tipul :%s ,marimea: %s ,md5: %s ,numele :%s \n",type,size,md5,fil);
+							
 									
 									s = strtol(size,NULL,10);
-										//length++;
-									if (siz>=lim){
-										if((point=realloc(head,(((lim+=ADD)+1)*sizeof(cgym_entry_t*))))){
+										if((point=realloc(head,(((siz)+2)*sizeof(cgym_entry_t*))))){
 											head=point;
 										}
 										else{
 											perror("realloc");
 										}
-									}
+									
 									head[siz++]=cgym_entry_init(fil,md5,(type[0]=='d'),s);
 								
 						}			
@@ -119,11 +121,14 @@ int cgym_recv_list_reply(cgym_sock_t *sock, cgym_entry_t ***e){
 					i=0;
 					clear(entr);
 				}
-		p++;
-		p=malloc(1);
+		
 		
 	}
-	head[siz++]=NULL;
+	printf("k=%d\n",k);
+	if (k==-1)
+	perror("recv");
+	printf("siz:%d",siz);
+	head[siz]=NULL;
 		*e=head;
 	return 0;
 }

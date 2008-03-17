@@ -113,195 +113,194 @@ void* client_handler(void *p){
 	char *buffer,*s=NULL;
 	int r=-1,n=0,siz=0,i,cmd=-1;
 	int rc = 0;
-	do{
-		rc = cgymd_send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG));
-	}while (rc ==1);	
-	s = readline(fd);
-	char *arg1=NULL,*arg2=NULL,*arg3=NULL;
-	i=0;
-	while((tmp=strtok(s," "))!=NULL){
-		switch (i){
-		case 0:{
-			command=malloc(strlen(tmp)+1);
-			strcpy(command,tmp);
-			break;
-		}
-		case 1:{
-			arg1=malloc(strlen(tmp)+1);
-			strcpy(arg1,tmp);
-			break;
-		}
-		case 2:{
-			arg2=malloc(strlen(tmp)+1);
-			strcpy(arg2,tmp);
-			break;
-		}
-		case 3:{
-			arg3=malloc(strlen(tmp)+1);
-			strcpy(arg3,tmp);
-			break;
-		}
-		default:{ //too many arguments
+	
 			do{
-				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+				rc = cgymd_send(fd, CGYM_ACK_MSG, strlen(CGYM_ACK_MSG));
 			}while (rc ==1);
-		}
-		}
-		s=s+strlen(tmp)+1;
-		tmp=NULL;
-		i++;
-	}
-	cmd=checkCommand(command);
-	switch(cmd){
-	case 0 :{ //LIST
-		dir=malloc(strlen(arg1)+1);
-		strcpy(dir,arg1);
-		FILE_INFO* file_info;
-		file_info = list(homedir,dir);
-		if(file_info==NULL){
-			do {
-				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
-			} while(rc == 1);
+			
+	while(1){
+		s = readline(fd);
+		if (s==NULL){
+			close(fd);
 			pthread_exit(NULL);
 		}
-		do {		
-			rc = cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG));
-		} while(rc == 1);
-		while (file_info->next) {
-			char *buffer=cgym_entry_tostring(file_info->entry_file);
+		char *arg1=NULL,*arg2=NULL,*arg3=NULL;
+		i=0;
+		while((tmp=strtok(s," "))!=NULL){
+			switch (i){
+			case 0:{
+				command=malloc(strlen(tmp)+1);
+				strcpy(command,tmp);
+				break;
+			}
+			case 1:{
+				arg1=malloc(strlen(tmp)+1);
+				strcpy(arg1,tmp);
+				break;
+			}
+			case 2:{
+				arg2=malloc(strlen(tmp)+1);
+				strcpy(arg2,tmp);
+				break;
+			}
+			case 3:{
+				arg3=malloc(strlen(tmp)+1);
+				strcpy(arg3,tmp);
+				break;
+			}
+			default:{ //too many arguments
+				do{
+					rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+				}while (rc ==1);
+			}
+			}
+			s=s+strlen(tmp)+1;
+			tmp=NULL;
+			i++;
+		}
+		cmd=checkCommand(command);
+		switch(cmd){
+		case 0 :{ //LIST
+			dir=malloc(strlen(arg1)+1);
+			strcpy(dir,arg1);
+			FILE_INFO* file_info;
+			file_info = list(homedir,dir);
+			if(file_info==NULL){
+				do {
+					rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+				} while(rc == 1);
+				pthread_exit(NULL);
+			}
+			do {		
+				rc = cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG));
+			} while(rc == 1);
+			while (file_info->next) {
+				char *buffer=cgym_entry_tostring(file_info->entry_file);
+				unsigned long dim=strlen(buffer);
+				do {		
+					rc = cgymd_send(fd, buffer, strlen(buffer));
+				} while(rc == 1);			
+				file_info = file_info->next; 
+			}
+			printf("am trimis lista\n");
+			do {		
+				rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
+			} while(rc == 1);
+			break;
+		}
+		case 1 :{ //SIZE
+			file=malloc(strlen(arg1)+1);
+			strcpy(file,arg1);
+			cgym_entry_t * entry_info = size(homedir,file);
+			char *buffer;//=cgym_entry_tostring(entry_info);
+			if(entry_info==NULL){
+				do{
+					rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+				}while (rc ==1);
+				pthread_exit(NULL);
+			}
+			buffer=cgym_entry_tostring(entry_info);
+			do{
+				rc = cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG));
+			}while (rc ==1);
 			unsigned long dim=strlen(buffer);
-			/*
 			int j;
+			
+			do{
+				rc = cgymd_send(fd, buffer, strlen(buffer));
+			}while (rc ==1);
+	/*
 			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
-				//printf("Send  %d\n",j);
-				if (cgymd_send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
-					perror("send");		
+				if (send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
+					perror("send");			
 					pthread_exit(NULL);
 				}
 			}
 			*/
-			do {		
-				rc = cgymd_send(fd, buffer, strlen(buffer));
-			} while(rc == 1);			
-			file_info = file_info->next; 
-		}
-		printf("am trimis lista\n");
-		do {		
-			rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
-		} while(rc == 1);
-		break;
-	}
-	case 1 :{ //SIZE
-		file=malloc(strlen(arg1)+1);
-		strcpy(file,arg1);
-		cgym_entry_t * entry_info = size(homedir,file);
-		char *buffer;//=cgym_entry_tostring(entry_info);
-		if(entry_info==NULL){
-			do{
-				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
-			}while (rc ==1);
-			pthread_exit(NULL);
-		}
-		buffer=cgym_entry_tostring(entry_info);
-		do{
-			rc = cgymd_send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG));
-		}while (rc ==1);
-		unsigned long dim=strlen(buffer);
-		int j;
-		
-		do{
-			rc = cgymd_send(fd, buffer, strlen(buffer));
-		}while (rc ==1);
-/*
-		for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
-			if (send(fd, buffer+j*MAX_SIZE,minOf2(strlen(buffer+j*MAX_SIZE),MAX_SIZE), 0) == -1){
-				perror("send");			
-				pthread_exit(NULL);
-			}
-		}
-		*/
-		
-		do{
-			rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
-		}while (rc ==1);
-/*
-		if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
-			perror("send");
-			pthread_exit(NULL);
-		}
-*/		
-		break;
-	}
-	case 2 :{ //GET
-		start=malloc(strlen(arg1)+1);
-		strcpy(start,arg1);
-		stop=malloc(strlen(arg2)+1);
-		strcpy(stop,arg2);
-		file=malloc(strlen(arg3)+1);
-		strcpy(file,arg3);
-		
-		char* file_contents = get(start,stop,homedir,file);
-		if (file_contents == NULL){
 			
-			do{
-				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
-			}while (rc ==1);
-/*
-			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-				perror("send");		
-			}
-*/
-			pthread_exit(NULL);
-		}
-		else{
-			if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
-		      perror("send");
-		      pthread_exit(NULL);
-			}
-			unsigned long dim=strlen(file_contents);
-			int j;
-			do{
-				rc = cgymd_send(fd, file_contents, strlen(file_contents));
-			}while (rc ==1);
-/*
-			
-			for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
-				if (send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE), 0) == -1){
-					perror("send");		
-					pthread_exit(NULL);
-				}
-			}
-*/
 			do{
 				rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
 			}while (rc ==1);
-/*
+	/*
 			if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
 				perror("send");
 				pthread_exit(NULL);
 			}
-*/
+	*/		
+			break;
 		}
-		break;
-	}
-	case 3 :{ //QUIT
-		break;
-	}
-	default:{ //Command not found
-		do{
-			rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
-		}while (rc ==1);
-		
-/*		
-		if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
-			perror("send");
+		case 2 :{ //GET
+			start=malloc(strlen(arg1)+1);
+			strcpy(start,arg1);
+			stop=malloc(strlen(arg2)+1);
+			strcpy(stop,arg2);
+			file=malloc(strlen(arg3)+1);
+			strcpy(file,arg3);
+			
+			char* file_contents = get(start,stop,homedir,file);
+			if (file_contents == NULL){
+				
+				do{
+					rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+				}while (rc ==1);
+	/*
+				if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+					perror("send");		
+				}
+	*/
+				pthread_exit(NULL);
+			}
+			else{
+				if (send(fd, CGYM_OK_MSG, strlen(CGYM_OK_MSG), 0) == -1){
+			      perror("send");
+			      pthread_exit(NULL);
+				}
+				unsigned long dim=strlen(file_contents);
+				int j;
+				do{
+					rc = cgymd_send(fd, file_contents, strlen(file_contents));
+				}while (rc ==1);
+	/*
+				
+				for(j=0;j<(int)(dim/MAX_SIZE)+1;j++){
+					if (send(fd, file_contents+j*MAX_SIZE,minOf2(strlen(file_contents+j*MAX_SIZE),MAX_SIZE), 0) == -1){
+						perror("send");		
+						pthread_exit(NULL);
+					}
+				}
+	*/
+				do{
+					rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));
+				}while (rc ==1);
+	/*
+				if (send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG), 0) == -1){
+					perror("send");
+					pthread_exit(NULL);
+				}
+	*/
+			}
+			break;
+		}
+		case 3 :{ //QUIT
+			close(fd);
 			pthread_exit(NULL);
+			break;
 		}
-		*/
+		default:{ //Command not found
+			do{
+				rc = cgymd_send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG));
+			}while (rc ==1);
+			
+	/*		
+			if (send(fd, CGYM_ERR_MSG, strlen(CGYM_ERR_MSG), 0) == -1){
+				perror("send");
+				pthread_exit(NULL);
+			}
+			*/
+		}
 	}
 	}
-	close(fd);
-	pthread_exit(NULL);
+	
 	
 }
 

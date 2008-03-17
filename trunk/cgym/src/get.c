@@ -17,7 +17,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
 	
 	enum cgym_sock_state state;
 	
-	// afisam niste informatii
+#ifdef DEBUG_CGYM
 	printf("getting '%s' in %d segments\n",
 		remote, nr_segm);
 	
@@ -28,6 +28,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  		cgym_server_info_print(*(serv++));
  		putchar('\n');
  	}
+#endif
  	
  	if ((sock = cgym_sock_create( *servers )) == NULL) {
  		printf("Error: could not create socket.\n");
@@ -64,7 +65,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  		return 5;
  	}
  	
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	printf("\n"
  			"Avem informatiile. Cerem fisierul...\n");
  	
@@ -79,7 +80,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  	serv = servers+1;
  	segm_size = cgym_entry_size(e) / nr_segm;
 
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	printf("len=%ld, nr_segm=%d, segm_size=%ld\n",
 				cgym_entry_size(e), nr_segm, segm_size);
 #endif
@@ -96,27 +97,15 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
 	 		if (*serv == NULL) {
 	 			serv = servers;
 	 		}
-	 		 		
-	 	 	if ((sock = cgym_sock_create( *(serv++) )) == NULL) {
-	 	 		printf("Error: could not create socket.\n");
-	 	 		return 1;
-	 	 	}
-	 
-	 	 	// TODO: try another server
-	 	 	if ((rc = cgym_sock_setblocking(sock, 0)) != 0) {
-	 	 		printf("Error[%d]: Could set socket to nonblocking mode\n", rc);
-	 	 		cgym_sock_info(sock);
-	 	 		printf("\n");
-	 	 		return 2;
-	 	 	}
-	 	 	
-	 	 	if ((rc = cgym_sock_connect(sock)) > 1) {
-	 	 		cgym_sock_info(sock);
-	 	 		printf("Error[%d]: Could not connect to ", rc);
-	 	 		cgym_server_info_print( cgym_sock_get_server(sock) );
-	 	 		printf("\n");
-	 	 		return 2;
-	 	 	}
+
+	 		if ((sock = cgym_sock_setup(serv++, servers)) != NULL) {
+	 			printf("Connected to ");
+	 			cgym_server_info_print( cgym_sock_get_server(sock) );
+	 			printf("\n");
+	 		} else {
+	 			printf("Eroare: nu ne-am putut conecta la nici un server.\n");
+	 			return 3;
+	 		}
  		}
  	 	
  	 	segm_start = i * segm_size;
@@ -127,7 +116,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  	 		segm_stop = cgym_entry_size(e);
  	 	}
  	 	
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 	printf("segmentul %d va cere (%ld, %ld)\n", i, segm_start, segm_stop);
 #endif
 
@@ -136,8 +125,23 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  	 	if (i == 0) {
  	 		if (cgym_send_get_req(segm[i])) {
  	 			printf("Error: could not send GET request.\n");
- 	 			// TODO: create new connection in its place
- 	 			exit(1);
+ 	 			
+ 		 		if (*serv == NULL) {
+ 		 			serv = servers;
+ 		 		}
+
+ 		 		if ((sock = cgym_sock_setup(serv, servers)) != NULL) {
+ 		 			printf("Connected to ");
+ 		 			cgym_server_info_print( cgym_sock_get_server(sock) );
+ 		 			printf("\n");
+ 		 		} else {
+ 		 			printf("Eroare: nu ne-am putut conecta la nici un server.\n");
+ 		 			return 3;
+ 		 		}
+
+ 		 		if (*serv == NULL) {
+ 		 			serv = servers;
+ 		 		}
  	 		}
  	 	}
  	}
@@ -149,7 +153,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  		FD_ZERO(&writefds);
  		FD_ZERO(&exceptfds);
  		
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  		printf("==== INIT ====\n");
 #endif
  		
@@ -159,7 +163,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  			sockfd = cgym_sock_get_sockfd(sock);
  			state = cgym_sock_get_state(sock);
  		
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  			cgym_sock_info(sock); printf("\n");
 #endif
  			
@@ -187,8 +191,8 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  				// eroare? trebuie repornit segmentul
  				case CGYM_SOCK_ERR:
  					printf("ERROR!\n");
- 					// TODO: fix!
- 					exit(1);
+ 					//TODO
+ 					return 4;
  					break;
  				
  				default:
@@ -215,7 +219,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
 	    	exit(1);
 	    }
 	    
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
 	    printf("### %d eventuri\n", rc);
 #endif
  
@@ -225,7 +229,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  			state = cgym_sock_get_state(sock);
  			
  			if (FD_ISSET(sockfd, &exceptfds)) {
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 			printf("SOCK (Before)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n");
@@ -237,7 +241,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  				rc--;
  				exit(1);
  				
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 			printf("SOCK (After)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n\n");
@@ -245,7 +249,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  			}
 
  			if (FD_ISSET(sockfd, &readfds)) {
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 			printf("SOCK (Before)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n");
@@ -351,7 +355,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  				}
 
  				rc--;
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 			printf("SOCK (After)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n\n");
@@ -359,7 +363,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  			}
 
  			if (FD_ISSET(sockfd, &writefds)) {
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 			printf("SOCK (Before)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n");
@@ -407,7 +411,7 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  				}
  				
  				rc--;
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  	 			printf("SOCK (After)[%d]: ", i);
  	 			cgym_sock_info(sock);
  	 			printf("\n\n");
@@ -424,14 +428,13 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
  		return 1;
  	}
  	 	
- 	// cgym_segment_assemble(fp, segm);
  	if (cgym_segment_assemble(e, segm)) {
  		printf("Eroare: Segmentele nu au putut fi asamblate.");
  		return 1;
  	}
  	
  	for (i = 0; i < nr_segm; i++) {
-#ifdef DEBUG
+#ifdef DEBUG_CGYM
  		printf("sock_info: ");
  		cgym_sock_info( cgym_segment_sock(segm[i]));
  		printf("\n");

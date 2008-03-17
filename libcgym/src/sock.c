@@ -435,7 +435,9 @@ int cgym_sock_close(cgym_sock_t *sock) {
 	if (sock != NULL) {
 		if (sock->state != CGYM_SOCK_NONE
 				&& sock->state != CGYM_SOCK_IDLE) { // connected
-			if (close(sock->sockfd)) {
+			if (close(sock->sockfd) == 0) {
+				sock->state = CGYM_SOCK_IDLE;
+			} else {
 				rc = 3;
 			}
 		}

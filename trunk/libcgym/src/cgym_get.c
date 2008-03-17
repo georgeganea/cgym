@@ -216,7 +216,7 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 							0, strlen(CGYM_OK_MSG),
 							strlen(CGYM_OK_MSG));
 					printf(tmp, sock->buf);
-					s->status = CGYM_SEGMENT_STARTED;
+					
 					
 					if (rc == 0) {
 						// am primit tot raspunsul (OK ?)
@@ -227,6 +227,7 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 							sock->state = CGYM_SOCK_CONNECTED;
 						} else {
 							printf("E OK: pos_recv = %ld\n", sock->pos_recv);
+							s->status = CGYM_SEGMENT_STARTED;
 							sock->state = CGYM_SOCK_RECV_GET_DATA;
 						}
 					} else if (rc > 1) {

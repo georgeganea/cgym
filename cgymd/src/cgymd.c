@@ -222,8 +222,9 @@ void* client_handler(void *p) {
 			strcpy(stop, arg2);
 			file=malloc(strlen(arg3)+1);
 			strcpy(file, arg3);
-
-			char* file_contents = get(start, stop, homedir, file);
+			int number;
+			char* file_contents = get(start, stop, homedir, file, &number);
+			printf("Numarul este:%d\n",number);
 			if (file_contents == NULL) {
 
 				do {
@@ -238,7 +239,7 @@ void* client_handler(void *p) {
 				unsigned long dim=strlen(file_contents);
 				int j;
 				do {
-					rc = cgymd_send(fd, file_contents, strlen(file_contents));
+					rc = cgymd_send(fd, file_contents, number);
 				} while (rc ==1);
 				do {
 					rc = cgymd_send(fd, CGYM_END_MSG, strlen(CGYM_END_MSG));

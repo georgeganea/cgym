@@ -255,6 +255,7 @@ int cgym_recv_get_reply(cgym_segment_t *s) {
 									"buf: %.4s\n", sock->buf);
 						
 							s->buf = sock->buf;
+							s->sock->state = CGYM_SOCK_CONNECTED;
 							s->status = CGYM_SEGMENT_DONE;
 						} else {
 							printf("Eroare: segmentul nu se termina cu \\r\\n\n");

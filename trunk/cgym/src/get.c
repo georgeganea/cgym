@@ -395,11 +395,23 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
 	 								cgym_segment_stop(segm[i]));
 	 						cgym_sock_close(sock);
 	 					} else if (ret > 1) {
-	 						cgym_sock_info(sock);
-	 				 		printf("Error[%d]: Could not receive GET reply ", ret);
-	 				 		// TODO: try another server
+#ifdef DEBUG_CGYM
+ 				 			cgym_sock_info(sock);
+ 				 			printf("Error[%d]: Could not receive GET reply ", ret);
 	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
-	 				 		return 2;
+#endif
+	 	 					/* Incercam sa ne conectam la alt server pentru acest segment */
+	 	 			 		if (*serv == NULL) {
+	 	 			 			serv = servers;
+	 	 			 		}
+
+	 	 			 		if ((sock = cgym_sock_setup(serv++, servers)) != NULL) {
+	 	 			 			printf("Connected to ");
+	 	 			 			cgym_server_info_print( cgym_sock_get_server(sock) );
+	 	 			 		} else {
+	 	 			 			printf("Eroare: nu ne-am putut conecta la nici un server.\n");
+	 	 			 			return 3;
+	 	 			 		}
 	 					}
 	 					break;
 	 				
@@ -449,20 +461,43 @@ int cgym_get(char *remote, int nr_segm, cgym_server_t **servers) {
 	 				 		// cere informatii
 	 				 		if ((ret = cgym_send_size_req(sock,
 	 				 							cgym_entry_file(e))) != 0) {
-		 				 		cgym_sock_info(sock);
-		 				 		// TODO
-		 				 		printf("Error[%d]: Could not send SIZE request ", ret);
+	#ifdef DEBUG_CGYM
+	 				 			cgym_sock_info(sock);
+	 				 			printf("Error[%d]: Could not send SIZE request ", ret);
 		 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
-		 				 		return 2;
+	#endif
+		 	 					/* Incercam sa ne conectam la alt server pentru acest segment */
+		 	 			 		if (*serv == NULL) {
+		 	 			 			serv = servers;
+		 	 			 		}
+	
+		 	 			 		if ((sock = cgym_sock_setup(serv++, servers)) != NULL) {
+		 	 			 			printf("Connected to ");
+		 	 			 			cgym_server_info_print( cgym_sock_get_server(sock) );
+		 	 			 		} else {
+		 	 			 			printf("Eroare: nu ne-am putut conecta la nici un server.\n");
+		 	 			 			return 3;
+		 	 			 		}
 	 				 		}
 	 				 	} else if (ret > 1) { // eroare
-	 				 		cgym_sock_info(sock);
-	 				 		printf("Error[%d]: Could not connect to ", ret);
-	 				 		// TODO
+#ifdef DEBUG_CGYM
+ 				 			cgym_sock_info(sock);
+ 				 			printf("Error[%d]: Could not connect to ", ret);
 	 				 		cgym_server_info_print( cgym_sock_get_server(sock) );
-	 				 		return 2;
-	 				 	}
+#endif
+	 	 					/* Incercam sa ne conectam la alt server pentru acest segment */
+	 	 			 		if (*serv == NULL) {
+	 	 			 			serv = servers;
+	 	 			 		}
 
+	 	 			 		if ((sock = cgym_sock_setup(serv++, servers)) != NULL) {
+	 	 			 			printf("Connected to ");
+	 	 			 			cgym_server_info_print( cgym_sock_get_server(sock) );
+	 	 			 		} else {
+	 	 			 			printf("Eroare: nu ne-am putut conecta la nici un server.\n");
+	 	 			 			return 3;
+	 	 			 		}
+	 				 	}
 	 				 	break;
  					
 					default:
